@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# Zabbix agent extension for monitoring SSL Certificates
+
+BUFFER=/tmp/zabbix-sslcert
+CFG=/etc/zabbix/zabbix-sslcert.conf
+SOFTWARE="sed openssl jo"
+
+function discover_sslcert() {
+    jo -p data=$( jo -a $(
+    cat $CFG | sed "/^#/d;s/#.*//" | while read line
+    do
+        host=${line/,*/}
+        port=${line/*,/}
+        if test -f $BUFFER/${host}_${port}; then
+            jo {\#SSLCERTURI}=${host}_${port}
+        fi
+    done ) )
+}
+
+function getdata() {
+    mkdir $BUFFER.$$; chmod 750 $BUFFER.$$
+    cd $BUFFER.$$
+
+    cat $CFG | sed "/^#/d;s/#.*//" | while read line
+    do
+        host=${line/,*/}
+        port=${line/*,/}
+        DATA=$(echo | openssl s_client -connect ${host}:${port} -servername $host 2>/dev/null | openssl x509 -noout -enddate -fingerprint)
+        CERTFP=$(echo ${DATA/*Fingerprint=/} | sed 's/://g')
+        CERTEXP=${DATA%%GMT*}
+        CERTEXP=$(($(date -d "${CERTEXP##*=}" +%s) - $(date +%s) ))
+
+        echo -e "FP:$CERTFP\nEXP:$CERTEXP" > ${host}_${port}
+    done
+
+    test -d $BUFFER && mv $BUFFER $BUFFER.old
+    mv $BUFFER.$$ $BUFFER
+    rm -rf $BUFFER.old
+}
+
+function sanity_check() {
+   ok=1
+   for prog in $SOFTWARE
+   do
+      which $prog > /dev/null || { echo "Missing program $prog."; ok=0; }
+   done
+   test -f $CONFIG || { echo "Missing configfile $CONFIG"; ok=0; }
+   test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+}
+
+sanity_check
+
+action=$1
+arg=$2
+
+case "$action" in
+    getdata)
+        getdata
+        ;;
+    sslcert.discover)
+        discover_sslcert
+        ;;
+    sslcert.master)
+        test -f $BUFFER/$arg && cat $BUFFER/$arg
+        ;;
+esac
