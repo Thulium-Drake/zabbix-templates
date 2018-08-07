@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# Zabbix agent extension for monitoring FlexLM license usage
+
+. /etc/zabbix/zabbix-flexlm.conf
+CFG=/etc/zabbix/zabbix-flexlm-licenses.conf
+BUFFER=/tmp/zabbix-flexlm
+SOFTWARE="sed jo"
+
+function discover_flexlm() {
+   jo -p data=$( jo -a $(
+   cat $CFG | sed "/^#/d;s/#.*//" | while read line
+   do
+      LICENSE=${line/,*/}
+      cat $BUFFER/$LICENSE | sed 's/,.*//' | while read feature rest
+      do
+         jo {\#LICENSE}=\"$LICENSE\" {\#FEATURE}=\"$feature\"
+      done
+   done))
+}
+
+function getdata() {
+   mkdir $BUFFER.$$; chmod 0750 $BUFFER.$$
+   cd $BUFFER.$$
+
+   cat $CFG | sed "/^#/d;s/#.*//" | while read line
+   do
+      LICENSE=${line/,*/}
+      LICENSEFILE=${line/*,/}
+      while read feature issued inuse rest
+      do
+         [ -n "$rest" ] && echo "$feature,-1,0" >> $LICENSE && continue
+         echo "$feature,$issued,$inuse" >> $LICENSE
+      done <<< $($LMSTAT -a -c $LICENSEFILE | grep Users | sed 's/Users of //; s/Total of //g; s/licenses* issued//; s/licenses* in use//' | tr -d [:punct:])
+   done
+
+   test -d $BUFFER && mv $BUFFER $BUFFER.old
+   mv $BUFFER.$$ $BUFFER
+   rm -rf $BUFFER.old
+}
+
+function sanity_check() {
+   ok=1
+   for prog in $SOFTWARE
+   do
+      which $prog > /dev/null || { echo "Missing program $prog."; ok=0; }
+   done
+   test -f $CFG || { echo "Missing configfile $CFG"; ok=0; }
+   test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+}
+
+sanity_check
+
+action=$1
+license=$2
+feature=$3
+
+case "$action" in
+getdata)
+	getdata
+;;
+flexlm.discover)
+	discover_flexlm
+;;
+flexlm.master)
+   test -f $BUFFER/$license && grep -w $feature $BUFFER/$license | sed "s/$feature,//"
+;;
+esac
