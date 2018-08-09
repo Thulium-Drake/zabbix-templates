@@ -51,7 +51,7 @@ hostname,port
 It is best to run the command from cron. The user running the command needs enough
 privileges to read the configuration file.
 
-In order to create statistisc the command needs to be run with the getdata option:
+In order to create statistics the command needs to be run with the getdata option:
 
 `/usr/local/bin/zabbix_sslcert getdata`
 
@@ -103,7 +103,7 @@ Zabbix should now start collecting data.
 # FILES
 
 `/usr/local/bin/zabbix_sslcert` Command
-`/etc/zabbix/zabbix-sslcert.conf` Credential configuration file
+`/etc/zabbix/zabbix-sslcert.conf` Certificate configuration
 `/etc/zabbix/zabbix-agentd.d/zabbix_agent-sslcert.conf` Agent configuration file
 
 # EXAMPLES
