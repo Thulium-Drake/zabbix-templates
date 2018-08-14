@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# Zabbix agent extension for monitoring SCSI tape drives via the ST driver
+
+BUFFER=/tmp/zabbix-tapestats
+SOFTWARE="jo"
+
+function discover_tapedrives() {
+   jo -p data=$( jo -a $(
+   for tape in $(ls /dev/tape/by-id | grep -v nst)
+   do
+      if test -f $BUFFER/$tape; then
+         jo {\#TAPEDRIVE}=\"${tape##*/}\"
+      fi
+   done ) )
+}
+
+function getdata() {
+   mkdir $BUFFER.$$; chmod 750 $BUFFER.$$
+   cd $BUFFER.$$
+
+   for tape in $(ls /dev/tape/by-id | grep -v nst)
+   do
+      device=$(readlink /dev/tape/by-id/$tape)
+
+      # filter out any non tape devices
+      [[ ${device##*/} != st* ]] && continue
+
+      grep . /sys/class/scsi_tape/${device##*/}/stats/* | sed 's#.*/stats/##' > $tape
+   done
+
+   test -d $BUFFER && mv $BUFFER $BUFFER.old
+   mv $BUFFER.$$ $BUFFER
+   rm -rf $BUFFER.old
+}
+
+function sanity_check() {
+   ok=1
+   for prog in $SOFTWARE
+   do
+      which $prog > /dev/null || { echo "Missing program $prog."; ok=0; }
+   done
+   test -f $CONFIG || { echo "Missing configfile $CONFIG"; ok=0; }
+   test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+}
+
+sanity_check
+
+action=$1
+arg=$2
+
+case "$action" in
+    getdata)
+        getdata
+        ;;
+    tapestats.discover)
+        discover_tapedrives
+        ;;
+    tapestats.master)
+        test -f $BUFFER/$arg && cat $BUFFER/$arg
+        ;;
+esac
