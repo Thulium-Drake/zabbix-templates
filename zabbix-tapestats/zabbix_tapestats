@@ -10,7 +10,7 @@ function discover_tapedrives() {
    for tape in $(ls /dev/tape/by-id | grep -v nst)
    do
       if test -f $BUFFER/$tape; then
-         jo {\#TAPEDRIVE}=\"${tape##*/}\"
+         jo {\#TAPEDRIVE}=${tape##*/}
       fi
    done ) )
 }
