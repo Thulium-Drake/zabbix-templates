@@ -81,7 +81,7 @@ agent that has been configuratie with the command follow the steps below.
 * Go to Configuration -> Hosts
 * Select the name of the host to configure
 * Go to templates
-* Choose Template ST devices at the Link new templates box
+* Choose Template Tape devices at the Link new templates box
 * Choose Add
 * Choose Update
 
