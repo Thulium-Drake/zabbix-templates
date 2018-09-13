@@ -3,7 +3,7 @@
 # Zabbix agent extension for monitoring bonding interfaces
 
 BUFFER=/tmp/zabbix-bondmon
-SOFTWARE="jo"
+SOFTWARE="jo sed"
 
 function discover_bonds() {
    jo -p data=$( jo -a $(
