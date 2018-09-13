@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# Zabbix agent extension for monitoring bonding interfaces
+
+BUFFER=/tmp/zabbix-bondmon
+SOFTWARE="jo"
+
+function discover_bonds() {
+   jo -p data=$( jo -a $(
+   for bond in $(ls /proc/net/bonding)
+   do
+      if test -f $BUFFER/$bond; then
+         while read line
+            do
+               jo {\#BOND}=${bond} {\#SLAVE}=${line%%:*}
+            done < $BUFFER/$bond
+      fi
+   done ) )
+}
+
+function getdata() {
+   mkdir $BUFFER.$$; chmod 750 $BUFFER.$$
+   cd $BUFFER.$$
+
+   for bond in $(ls /proc/net/bonding)
+   do
+      grep -A1 'Slave Interface'  /proc/net/bonding/$bond | cut -d: -f2 | sed -Ee '/(--|^$)/d' | paste - - -d: | tr -d '[:blank:]' > $bond
+   done
+
+   test -d $BUFFER && mv $BUFFER $BUFFER.old
+   mv $BUFFER.$$ $BUFFER
+   rm -rf $BUFFER.old
+}
+
+function sanity_check() {
+   ok=1
+   for prog in $SOFTWARE
+   do
+      which $prog > /dev/null || { echo "Missing program $prog."; ok=0; }
+   done
+   test -f $CONFIG || { echo "Missing configfile $CONFIG"; ok=0; }
+   test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+}
+
+sanity_check
+
+action=$1
+bond=$2
+slave=$3
+
+case "$action" in
+    getdata)
+        getdata
+        ;;
+    bondmon.discover)
+        discover_bonds
+        ;;
+    bondmon.state)
+        test -f $BUFFER/$bond && grep $slave $BUFFER/$bond | cut -d: -f2
+        ;;
+esac
