@@ -31,7 +31,7 @@ function getdata() {
       do
          [ -n "$rest" ] && echo "$feature,-1,0" >> $LICENSE && continue
          echo "$feature,$issued,$inuse" >> $LICENSE
-      done <<< $($LMSTAT $LICENSEFILE | grep Users | sed 's/Users of //; s/Total of //g; s/licenses* issued//; s/licenses* in use//' | tr -d [:punct:] | tr -s " ")
+      done <<< $($LMSTAT $LICENSEFILE | sed -e 's/\r//g' | grep Users | sed 's/Users of //; s/Total of //g; s/licenses* issued//; s/licenses* in use//' | tr -d [:punct:] | tr -s " ")
    done
 
    test -d $BUFFER && mv $BUFFER $BUFFER.old
