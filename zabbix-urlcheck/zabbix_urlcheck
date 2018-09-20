@@ -36,7 +36,7 @@ function getdata() {
         else
            for proxy in $proxies
            do
-              proxy_name=$(echo $proxy | awk -F[/:] '{print $4}')
+              proxy_name=$(echo $proxy | awk -F/ '{print $3}' | sed 's/:.*//')
               echo $proxy_name:$(http_proxy=$proxy https_proxy=$proxy timeout 15 curl -k -o result -sS -w "%{http_code}" $url 2>/dev/null || echo 520) >>$url
            done
         fi
