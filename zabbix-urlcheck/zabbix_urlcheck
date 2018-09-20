@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# Zabbix agent extension for monitoring URLs
+
+BUFFER=/tmp/zabbix-urlcheck
+CFG=/etc/zabbix/zabbix-urlcheck.conf
+SOFTWARE="sed curl jo awk"
+
+function discover_urlcheck() {
+    jo -p data=$( jo -a $(
+    cat $CFG | sed "/^#/d;s/#.*//" | while read line
+    do
+        IFS=, read url proxies <<< $line
+        url=$(echo $url | awk -F[/:] '{print $4}')
+        if test -f $BUFFER/${url}; then
+           cat $BUFFER/${url} | while read line
+           do
+              IFS=: read proxy retcode <<< $line
+              jo {\#URL}=${url} {\#PROXY}=${proxy}
+           done
+        fi
+    done ) )
+}
+
+function getdata() {
+    mkdir $BUFFER.$$; chmod 750 $BUFFER.$$
+    cd $BUFFER.$$
+
+    cat $CFG | sed "/^#/d;s/#.*//" | while read line
+    do
+        IFS=, read url proxies <<< $line
+        url=$(echo $url | awk -F[/:] '{print $4}')
+
+        if test -z "$proxies"; then
+           echo noproxy:$(timeout 15 curl -k -o result -sS -w "%{http_code}" $url 2>/dev/null || echo 520) >>$url
+        else
+           for proxy in $proxies
+           do
+              proxy_name=$(echo $proxy | awk -F[/:] '{print $4}')
+              echo $proxy_name:$(http_proxy=$proxy https_proxy=$proxy timeout 15 curl -k -o result -sS -w "%{http_code}" $url 2>/dev/null || echo 520) >>$url
+           done
+        fi
+    done
+
+    test -d $BUFFER && mv $BUFFER $BUFFER.old
+    mv $BUFFER.$$ $BUFFER
+    rm -rf $BUFFER.old
+}
+
+function sanity_check() {
+   ok=1
+   for prog in $SOFTWARE
+   do
+      which $prog > /dev/null || { echo "Missing program $prog."; ok=0; }
+   done
+   test -f $CONFIG || { echo "Missing configfile $CONFIG"; ok=0; }
+   test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+}
+
+sanity_check
+
+action=$1
+arg=$2
+proxy=$3
+
+case "$action" in
+    getdata)
+        getdata
+        ;;
+    urlcheck.discover)
+        discover_urlcheck
+        ;;
+    urlcheck.retcode)
+        if test -z "$proxy"; then
+           cat $BUFFER/$arg
+        else
+           test -f $BUFFER/$arg && grep -w $proxy $BUFFER/$arg
+        fi
+        ;;
+esac
