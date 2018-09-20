@@ -74,7 +74,7 @@ case "$action" in
         if test -z "$proxy"; then
            cat $BUFFER/$arg
         else
-           test -f $BUFFER/$arg && grep -w $proxy $BUFFER/$arg
+           test -f $BUFFER/$arg && grep -w $proxy $BUFFER/$arg | cut -d: -f2
         fi
         ;;
 esac
