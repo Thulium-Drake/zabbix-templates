@@ -7,7 +7,7 @@ SOFTWARE="jo"
 
 function discover_disks() {
    jo -p data=$( jo -a $(
-   lsblk -ro NAME,TYPE | egrep 'disk|raid?' | sort -u | while read disk rest
+   lsblk -ro NAME,TYPE 2>/dev/null | egrep 'disk|raid?' | sort -u | while read disk rest
    do
       jo {\#DISK}=${disk}
    done ) )
@@ -17,7 +17,7 @@ function getdata() {
    mkdir $BUFFER.$$; chmod 750 $BUFFER.$$
    cd $BUFFER.$$
 
-   lsblk -ro NAME,TYPE | egrep 'disk|raid?' | sort -u | while read disk rest
+   lsblk -ro NAME,TYPE 2>/dev/null | egrep 'disk|raid?' | sort -u | while read disk rest
    do
       grep -w $disk /proc/diskstats | while read MAJOR MINOR DMNAME READS_COMPLETED READS_MERGED READS_SECTORS READS_TIME WRITES_COMPLETED WRITES_MERGED WRITES_SECTORS WRITES_TIME IO_QUEUE IO_TIME WIO_TIME
       do
