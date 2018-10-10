@@ -101,7 +101,7 @@
                     </item_prototypes>
                     <trigger_prototypes>
                         <trigger_prototype>
-                            <expression>{Template Linux Bond monitoring:bondmon.state[{#BOND},{#SLAVE}].str(up)}=0</expression>
+                            <expression>{Template Linux Bond monitoring:bondmon.state[{#BOND},{#SLAVE}].str(up)}<>0</expression>
                             <recovery_mode>0</recovery_mode>
                             <recovery_expression/>
                             <name>Bond {#BOND} - slave {#SLAVE} is down</name>
