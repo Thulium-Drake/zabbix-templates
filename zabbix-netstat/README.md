@@ -17,12 +17,12 @@ Based on the collected information, the following graphs are made:
 And the following triggers are available:
 
 * Rate of $i is not 0
-** Errors
-** Drops
-** Fifo (Overflows)
-** Framing
-** Collisions
-** Carrier losses
+   * Errors
+   * Drops
+   * Fifo (Overflows)
+   * Framing
+   * Collisions
+   * Carrier losses
 
 For more information see:
 [zabbix_netstat](ZABBIX_NETSTAT.md)
