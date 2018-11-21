@@ -24,7 +24,7 @@ function getdata() {
     cat $CFG | sed "/^#/d;s/#.*//" | while read line
     do
         IFS=, read host port starttls <<< $line
-        DATA=$(echo | timeout 15 openssl s_client -connect ${host}:${port} $(test -n "$starttls" && echo "-starttls $starttls") -servername $host 2>/dev/null | openssl x509 -noout -enddate -fingerprint)
+        DATA=$(echo | timeout 15 openssl s_client -connect ${host}:${port} $(test -n "$starttls" && echo "-starttls $starttls") -servername $host 2>/dev/null | openssl x509 -noout -enddate -fingerprint 2>/dev/null || echo -e "notAfter=0\nFingerprint=0")
         CERTFP=$(echo ${DATA/*Fingerprint=/} | sed 's/://g')
         CERTEXP=${DATA%%GMT*}
         CERTEXP=$(($(date -d "${CERTEXP##*=}" +%s) - $(date +%s) ))
