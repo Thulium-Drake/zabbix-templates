@@ -4,6 +4,7 @@
 
 BUFFER=/tmp/zabbix-mailflow
 CFG=/home/jp76350/git/zabbix-templates-jeff/zabbix-mailflow/zabbix-mailflow.conf
+AWKSCRIPT=/home/jp76350/git/zabbix-templates-jeff/zabbix-mailflow/zabbix_mailflow_getheader.awk
 SOFTWARE="sed jo ssh"
 
 source $CFG
@@ -33,7 +34,7 @@ function process_mail() {
     do
        [[ $index -le $LAST_RELAY ]] && MAILSTATS="${MAILSTATS}${RELAY[$index]}:$timestamp\n"
        [[ $index -eq $SUBJECT ]] && MAILID=$timestamp
-    done <<< $(awk -v first_relay="$FIRST_RELAY" -v last_relay="$LAST_RELAY" -f /home/jp76350/git/zabbix-templates-jeff/zabbix-mailflow/zabbix_mailflow_getheader.awk /dev/stdin)
+    done <<< $(awk -v first_relay="$FIRST_RELAY" -v last_relay="$LAST_RELAY" -f $AWKSCRIPT /dev/stdin)
 
     echo -e $MAILSTATS > $MAILID
 }
@@ -41,28 +42,29 @@ function process_mail() {
 function getdata() {
    cd $BUFFER || exit 1
 
-   MAILS=$(tail -n 2 $BUFFER/sent.log)
+   MAILS=$(tail -n $MAILCOUNT $BUFFER/sent.log)
+   MISSED=0
+   declare -a RELAY_SUM
 
+   # gather sum delay for all relay for all mails checked
    for mail in $MAILS
    do
-      for ((relay=$FIRST_RELAY; relay<$LAST_RELAY; relay++))
+      test -f $mail || let "MISSED++"
+
+      for ((i=$FIRST_RELAY; i<$LAST_RELAY; i++))
       do
-         ${RELAY_SUM[relay]}=$(grep ${RELAY[relay]} $mail | cut -d: -f2)
+         DELAY=$(grep ${RELAY[i]} $mail | cut -d: -f2)
+         test -z $DELAY && continue
+         RELAY_SUM[i]=$((${RELAY_SUM[i]} + $DELAY))
       done
    done
 
-
-#   MAILS=(*)
-#   for ((i=$FIRST_RELAY; i<$LAST_RELAY; i++))
-#   do
-#      NUMBERS=($(grep -h ${RELAY[i]} "$LAST_MAILS" | cut -d: -f2))
-#      SUM=0
-#      for j in ${NUMBERS[@]}
-#      do
-#         SUM=$(($SUM + $j))
-#      done
-#      echo ${RELAY[i]}:$(($SUM / ${#NUMBERS[@]}))
-#   done
+   # calculate the average delay for each relay
+   for ((i=$FIRST_RELAY; i<$LAST_RELAY; i++))
+   do
+      echo ${RELAY[i]}:$((${RELAY_SUM[i]} / $MAILCOUNT))
+   done
+   echo missing:$MISSED
 }
 
 function sanity_check() {
@@ -73,6 +75,8 @@ function sanity_check() {
    done
    test -f $CONFIG || { echo "Missing configfile $CONFIG"; ok=0; }
    test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+
+   mkdir -p $BUFFER
 }
 
 sanity_check
