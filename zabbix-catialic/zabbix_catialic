@@ -50,6 +50,6 @@ catialic.discover)
 	discover_catialic
 ;;
 catialic.master)
-   test -f $BUFFER/$feature && grep -w $feature $BUFFER/$feature
+   test -f $BUFFER/$feature && cat $BUFFER/$feature
 ;;
 esac
