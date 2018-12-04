@@ -5,7 +5,7 @@
 BUFFER=/tmp/zabbix-mailflow
 CFG=/etc/zabbix/zabbix-mailflow.conf
 AWKSCRIPT=/etc/zabbix/zabbix_mailflow_getheader.awk
-SOFTWARE="awk jo ssh"
+SOFTWARE="awk fetchmail jo ssh"
 
 source $CFG
 
@@ -41,6 +41,9 @@ function process_mail() {
 
 function getmaster() {
    cd $BUFFER || exit 1
+
+   # check for any unprocessed mails
+   fetchmail
 
    MAILS=$(tail -n $MAILCOUNT $BUFFER/sent.log)
    MISSED=0

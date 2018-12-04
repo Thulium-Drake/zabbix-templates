@@ -29,6 +29,7 @@ In order for this command to work, the following software needs to be available:
 * jo
 * awk
 * ssh
+* fetchmail
 
 ### ZABBIX_MAILFLOW CONFIGURATION
 
@@ -62,19 +63,27 @@ privileges to read the configuration file and an SSH key to a remote host.
 
 In order to send a monitor mail the command needs to be run with the send_mail option:
 
-`/usr/local/bin/zabbix_sslcert send_mail`
+`/usr/local/bin/zabbix_mailflow send_mail`
 
 The command will not produce output, but will send a message to the configured recipient.
 
 A useful crontab entry would be:
 
-`* * * * * /usr/local/bin/zabbix_sslcert send_mail`
+`* * * * * /usr/local/bin/zabbix_mailflow send_mail`
 
 ##### PROCESSING INCOMING MONITOR MAILS
 
-It is recommended to use Fetchmail to process the incoming monitor emails
+It is recommended to use Fetchmail to process the incoming monitor emails. In order to do so
+place the following configuration in ~zabbix/.fetchmailrc
 
-TODO: Fetchmail config
+```
+set logfile /var/lib/zabbix/fetchmail.log
+set no bouncemail
+
+poll mail.example.com protocol imap username "zabbix" password "z@bb1x1saw3$som3" mda "/usr/local/bin/zabbix_mailflow process_mail"
+```
+
+The command will automatically retrieve any messages when the Zabbix agent retrieves statistics.
 
 ### CONFIGURING ZABBIX AGENT
 
@@ -116,7 +125,7 @@ Zabbix should now start collecting data.
 # FILES
 
 `/usr/local/bin/zabbix_mailflow` Command
-`/etc/zabbix/zabbix-mailflow.conf` Certificate configuration
+`/etc/zabbix/zabbix-mailflow.conf` Mailflow configuration
 `/etc/zabbix/zabbix-agentd.d/zabbix_agent-mailflow.conf` Agent configuration file
 
 # EXAMPLES
