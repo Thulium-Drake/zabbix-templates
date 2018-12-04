@@ -2,10 +2,8 @@
 #
 # Zabbix agent extension for monitoring CATIA license usage
 
-#. /etc/zabbix/zabbix-catialic.conf
-. /home/fs76925/git/zabbix-templates-jeff/zabbix-catialic/zabbix-catialic.conf
+. /etc/zabbix/zabbix-catialic.conf
 AWKSCRIPT=/etc/zabbix/zabbix-catialic.awk
-AWKSCRIPT=/home/fs76925/git/zabbix-templates-jeff/zabbix-catialic/zabbix-catialic.awk
 BUFFER=/tmp/zabbix-catialic
 SOFTWARE="curl sed jo"
 
@@ -52,6 +50,6 @@ catialic.discover)
 	discover_catialic
 ;;
 catialic.master)
-   test -f $BUFFER/$feature && grep -w $feature $BUFFER/$feature
+   test -f $BUFFER/$feature && cat $BUFFER/$feature
 ;;
 esac
