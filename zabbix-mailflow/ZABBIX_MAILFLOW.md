@@ -31,6 +31,11 @@ In order for this command to work, the following software needs to be available:
 * ssh
 * fetchmail
 
+This command also requires 'zabbix_mailflow_getheader.awk' to be installed in the
+default location:
+
+`/etc/zabbix/zabbix_mailflow_getheader.awk`
+
 ### ZABBIX_MAILFLOW CONFIGURATION
 
 There is one configuration file for this command.
@@ -126,6 +131,7 @@ Zabbix should now start collecting data.
 
 `/usr/local/bin/zabbix_mailflow` Command
 `/etc/zabbix/zabbix-mailflow.conf` Mailflow configuration
+`/etc/zabbix/zabbix_mailflow_getheader.awk` AWK-script
 `/etc/zabbix/zabbix-agentd.d/zabbix_agent-mailflow.conf` Agent configuration file
 
 # EXAMPLES
