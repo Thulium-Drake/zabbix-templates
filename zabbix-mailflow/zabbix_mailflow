@@ -68,7 +68,7 @@ function getmaster() {
    # calculate the average delay for each relay
    for ((i=$FIRST_RELAY; i<$LAST_RELAY; i++))
    do
-      echo ${RELAY[i]}:$((${RELAY_SUM[i]} / $MAILCOUNT))
+      echo ${RELAY[i]}:$((${RELAY_SUM[i]} / $(( $MAILCOUNT - $MISSED)) ))
    done
    echo missing:$MISSED
 }
