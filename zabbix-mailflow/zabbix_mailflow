@@ -1,0 +1,107 @@
+#!/bin/bash
+#
+# Zabbix agent extension for monitoring SMTP flows
+
+BUFFER=/tmp/zabbix-mailflow
+CFG=/etc/zabbix/zabbix-mailflow.conf
+AWKSCRIPT=/etc/zabbix/zabbix_mailflow_getheader.awk
+SOFTWARE="awk fetchmail jo ssh"
+
+source $CFG
+
+function discover_mailflow() {
+    jo -p data=$( jo -a $(
+      for ((i=0; i<$LAST_RELAY; i++))
+      do
+         jo {\#RELAY}=${RELAY[i]}
+      done
+      ) )
+}
+
+function send_mail() {
+    mkdir -p $BUFFER; chmod 750 $BUFFER
+    cd $BUFFER
+
+    NOW=$(date +%s)
+    ssh $MAILCLIENT "echo 'This message is intended for Zabbix.' | mail -s $NOW $EMAILADDR"
+    echo $NOW >> sent.log
+}
+
+function process_mail() {
+    cd $BUFFER || exit 1
+
+    while IFS=- read timestamp index
+    do
+       [[ $index -le $LAST_RELAY ]] && MAILSTATS="${MAILSTATS}${RELAY[$index]}:$timestamp\n"
+       [[ $index -eq $SUBJECT ]] && MAILID=$timestamp
+    done <<< $(awk -v first_relay="$FIRST_RELAY" -v last_relay="$LAST_RELAY" -f $AWKSCRIPT /dev/stdin)
+
+    echo -e $MAILSTATS > $MAILID
+}
+
+function getmaster() {
+   cd $BUFFER || exit 1
+
+   # check for any unprocessed mails
+   fetchmail
+
+   MAILS=$(tail -n $MAILCOUNT $BUFFER/sent.log)
+   MISSED=0
+   declare -a RELAY_SUM
+
+   # gather sum delay for all relay for all mails checked
+   for mail in $MAILS
+   do
+      test -f $mail || {
+         let "MISSED++"
+         continue
+      }
+
+      for ((i=$FIRST_RELAY; i<$LAST_RELAY; i++))
+      do
+         DELAY=$(grep ${RELAY[i]} $mail | cut -d: -f2)
+         test -z $DELAY && continue
+         RELAY_SUM[i]=$((${RELAY_SUM[i]} + $DELAY))
+      done
+   done
+
+   # calculate the average delay for each relay
+   for ((i=$FIRST_RELAY; i<$LAST_RELAY; i++))
+   do
+      echo ${RELAY[i]}:$((${RELAY_SUM[i]} / $MAILCOUNT))
+   done
+   echo missing:$MISSED
+}
+
+function sanity_check() {
+   ok=1
+   for prog in $SOFTWARE
+   do
+      which $prog > /dev/null || { echo "Missing program $prog."; ok=0; }
+   done
+   test -f $CONFIG || { echo "Missing configfile $CONFIG"; ok=0; }
+   test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+
+   mkdir -p $BUFFER
+}
+
+sanity_check
+
+action=$1
+arg=$2
+
+case "$action" in
+    mailflow.discover)
+        discover_mailflow
+        ;;
+    mailflow.master)
+        getmaster
+        ;;
+    process_mail)
+        process_mail
+        ;;
+    send_mail)
+        send_mail
+        ;;
+esac
+
