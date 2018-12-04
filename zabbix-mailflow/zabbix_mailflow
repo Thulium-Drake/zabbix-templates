@@ -3,8 +3,8 @@
 # Zabbix agent extension for monitoring SMTP flows
 
 BUFFER=/tmp/zabbix-mailflow
-CFG=/home/jp76350/git/zabbix-templates-jeff/zabbix-mailflow/zabbix-mailflow.conf
-AWKSCRIPT=/home/jp76350/git/zabbix-templates-jeff/zabbix-mailflow/zabbix_mailflow_getheader.awk
+CFG=/etc/zabbix/zabbix-mailflow.conf
+AWKSCRIPT=/etc/zabbix/zabbix_mailflow_getheader.awk
 SOFTWARE="sed jo ssh"
 
 source $CFG
@@ -39,7 +39,7 @@ function process_mail() {
     echo -e $MAILSTATS > $MAILID
 }
 
-function getdata() {
+function getmaster() {
    cd $BUFFER || exit 1
 
    MAILS=$(tail -n $MAILCOUNT $BUFFER/sent.log)
@@ -85,14 +85,11 @@ action=$1
 arg=$2
 
 case "$action" in
-    getdata)
-        getdata
-        ;;
     mailflow.discover)
         discover_mailflow
         ;;
     mailflow.master)
-        test -f $BUFFER/$arg && cat $BUFFER/$arg
+        getmaster
         ;;
     process_mail)
         process_mail
