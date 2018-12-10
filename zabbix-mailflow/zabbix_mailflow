@@ -25,6 +25,14 @@ function send_mail() {
     NOW=$(date +%s)
     ssh $MAILCLIENT "echo 'This message is intended for Zabbix.' | mail -s $NOW $EMAILADDR"
     echo $NOW >> sent.log
+
+    # clean up old messages
+    for mail in $(head -n-$(($MAILCOUNT * 3)) sent.log)
+    do
+       rm -f $mail
+    done
+
+    tail -n $(($MAILCOUNT * 3)) sent.log > sent.log
 }
 
 function process_mail() {
@@ -45,7 +53,8 @@ function getmaster() {
    # check for any unprocessed mails
    fetchmail
 
-   MAILS=$(tail -n $MAILCOUNT $BUFFER/sent.log)
+   # skip the last message, to prevent false positives
+   MAILS=$(tail -n $MAILCOUNT $BUFFER/sent.log | head -n-1)
    MISSED=0
    declare -a RELAY_SUM
 
