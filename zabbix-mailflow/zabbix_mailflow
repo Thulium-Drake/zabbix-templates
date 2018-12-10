@@ -32,7 +32,8 @@ function send_mail() {
        rm -f $mail
     done
 
-    tail -n $(($MAILCOUNT * 3)) sent.log > sent.log
+    tail -n $(($MAILCOUNT * 3)) sent.log > sent.log.tmp
+    mv sent.log.tmp sent.log
 }
 
 function process_mail() {
