@@ -54,8 +54,6 @@ function getmaster() {
    # check for any unprocessed mails
    fetchmail
 
-   sleep 3
-
    # skip the last message, to prevent false positives
    MAILS=$(tail -n $MAILCOUNT $BUFFER/sent.log | head -n-1)
    MISSED=0
