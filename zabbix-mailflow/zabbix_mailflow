@@ -55,9 +55,6 @@ function process_mail() {
 function getmaster() {
    cd $BUFFER || exit 1
 
-   # check for any unprocessed mails
-   fetchmail
-
    # skip the last message, to prevent false positives
    MAILS=$(tail -n $MAILCOUNT $BUFFER/sent.log | head -n-1)
    MISSED=0
