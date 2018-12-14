@@ -34,6 +34,10 @@ function send_mail() {
 
     tail -n $(($MAILCOUNT * 3)) sent.log > sent.log.tmp
     mv sent.log.tmp sent.log
+
+    # also check for unreceived mail, it has no use to put this in a seperate function, as this function already runs each minute
+    fetchmail
+
 }
 
 function process_mail() {
