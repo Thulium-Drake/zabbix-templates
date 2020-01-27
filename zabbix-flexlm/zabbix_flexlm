@@ -14,7 +14,7 @@ function discover_flexlm() {
       LICENSE=${line/,*/}
       cat $BUFFER/$LICENSE | sed 's/,.*//' | while read feature rest
       do
-         jo {\#LICENSE}=\"$LICENSE\" {\#FEATURE}=\"$feature\"
+         jo {\#LICENSE}="$LICENSE" {\#FEATURE}="$feature"
       done
    done))
 }
