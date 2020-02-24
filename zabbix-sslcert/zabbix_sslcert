@@ -30,7 +30,7 @@ function getdata() {
         if test "$host_name" == "$host_proxy"; then
           unset host_proxy
         fi
-        DATA=$(timeout 5 openssl s_client -connect ${host_name}:${port} $(test -n "$starttls" && echo "-starttls $starttls") $(test -n "$host_proxy" && echo "-proxy $host_proxy") -servername $host <<< "" 2>/dev/null | openssl x509 -noout -enddate -fingerprint 2>/dev/null || echo -e "notAfter=0\nFingerprint=0")
+        DATA=$(timeout 5 openssl s_client -connect ${host_name}:${port} $(test -n "$starttls" && echo "-starttls $starttls") $(test -n "$host_proxy" && echo "-proxy $host_proxy") -servername $host <<< "" 2>/dev/null | openssl x509 -noout -enddate -fingerprint 2>/dev/null || echo -e "notAfter=0\nFingerprint=ERR")
         CERTFP=$(echo ${DATA/*Fingerprint=/} | sed 's/://g')
         CERTEXP=${DATA%%GMT*}
         CERTEXP=$(($(date -d "${CERTEXP##*=}" +%s) - $(date +%s) ))
