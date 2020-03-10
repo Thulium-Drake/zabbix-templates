@@ -1,153 +1,161 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" ?>
 <zabbix_export>
-    <version>4.4</version>
-    <date>2020-02-24T12:47:21Z</date>
-    <groups>
-        <group>
-            <name>Templates</name>
-        </group>
-    </groups>
-    <templates>
-        <template>
-            <template>Template SSL Certificates</template>
-            <name>Template SSL Certificates</name>
-            <groups>
-                <group>
-                    <name>Templates</name>
-                </group>
-            </groups>
-            <applications>
-                <application>
-                    <name>SSL Certificates</name>
-                </application>
-            </applications>
-            <discovery_rules>
-                <discovery_rule>
-                    <name>SSL certificates</name>
-                    <key>sslcert.discover</key>
-                    <delay>30s</delay>
-                    <item_prototypes>
-                        <item_prototype>
-                            <name>Certificate {#SSLCERTURI} remaining validity</name>
-                            <type>DEPENDENT</type>
-                            <key>sslcert.expiration[{#SSLCERTURI}]</key>
-                            <delay>0</delay>
-                            <history>7d</history>
-                            <trends>7d</trends>
-                            <value_type>FLOAT</value_type>
-                            <units>s</units>
-                            <applications>
-                                <application>
-                                    <name>SSL Certificates</name>
-                                </application>
-                            </applications>
-                            <preprocessing>
-                                <step>
-                                    <type>REGEX</type>
-                                    <params>EXP:(-?[0-9]+)
+	<version>4.4</version>
+	<date>2018-01-01T01:01:01Z</date>
+	<groups>
+		<group>
+			<name>Templates</name>
+		</group>
+	</groups>
+	<templates>
+		<template>
+			<template>Template SSL Certificates</template>
+			<name>Template SSL Certificates</name>
+			<groups>
+				<group>
+					<name>Templates</name>
+				</group>
+			</groups>
+			<applications>
+				<application>
+					<name>SSL Certificates</name>
+				</application>
+			</applications>
+			<discovery_rules>
+				<discovery_rule>
+					<name>SSL certificates</name>
+					<key>sslcert.discover</key>
+					<delay>30s</delay>
+					<item_prototypes>
+						<item_prototype>
+							<name>Certificate {#SSLCERTURI} remaining validity</name>
+							<type>DEPENDENT</type>
+							<key>sslcert.expiration[{#SSLCERTURI}]</key>
+							<delay>0</delay>
+							<history>7d</history>
+							<trends>7d</trends>
+							<value_type>FLOAT</value_type>
+							<units>s</units>
+							<applications>
+								<application>
+									<name>SSL Certificates</name>
+								</application>
+							</applications>
+							<preprocessing>
+								<step>
+									<type>REGEX</type>
+									<params>EXP:(-?[0-9]+)
 \1</params>
-                                </step>
-                            </preprocessing>
-                            <master_item>
-                                <key>sslcert.master[{#SSLCERTURI}]</key>
-                            </master_item>
-                            <request_method>POST</request_method>
-                            <trigger_prototypes>
-                                <trigger_prototype>
-                                    <expression>{last()}&lt;0</expression>
-                                    <name>Certificate {#SSLCERTURI} expired</name>
-                                    <priority>DISASTER</priority>
-                                </trigger_prototype>
-                                <trigger_prototype>
-                                    <expression>{last()}&lt;432000</expression>
-                                    <name>Certificate {#SSLCERTURI} will expire in 5 days</name>
-                                    <priority>HIGH</priority>
-                                    <dependencies>
-                                        <dependency>
-                                            <name>Certificate {#SSLCERTURI} expired</name>
-                                            <expression>{Template SSL Certificates:sslcert.expiration[{#SSLCERTURI}].last()}&lt;0</expression>
-                                        </dependency>
-                                    </dependencies>
-                                </trigger_prototype>
-                                <trigger_prototype>
-                                    <expression>{last()}&lt;1296000</expression>
-                                    <name>Certificate {#SSLCERTURI} will expire in 15 days</name>
-                                    <priority>AVERAGE</priority>
-                                    <dependencies>
-                                        <dependency>
-                                            <name>Certificate {#SSLCERTURI} will expire in 5 days</name>
-                                            <expression>{Template SSL Certificates:sslcert.expiration[{#SSLCERTURI}].last()}&lt;432000</expression>
-                                        </dependency>
-                                    </dependencies>
-                                </trigger_prototype>
-                                <trigger_prototype>
-                                    <expression>{last()}&lt;2592000</expression>
-                                    <name>Certificate {#SSLCERTURI} will expire in 30 days</name>
-                                    <priority>WARNING</priority>
-                                    <dependencies>
-                                        <dependency>
-                                            <name>Certificate {#SSLCERTURI} will expire in 15 days</name>
-                                            <expression>{Template SSL Certificates:sslcert.expiration[{#SSLCERTURI}].last()}&lt;1296000</expression>
-                                        </dependency>
-                                    </dependencies>
-                                </trigger_prototype>
-                            </trigger_prototypes>
-                        </item_prototype>
-                        <item_prototype>
-                            <name>Certificate {#SSLCERTURI} Fingerprint</name>
-                            <type>DEPENDENT</type>
-                            <key>sslcert.fingerprint[{#SSLCERTURI}]</key>
-                            <delay>0</delay>
-                            <history>7d</history>
-                            <trends>0</trends>
-                            <value_type>TEXT</value_type>
-                            <applications>
-                                <application>
-                                    <name>SSL Certificates</name>
-                                </application>
-                            </applications>
-                            <preprocessing>
-                                <step>
-                                    <type>REGEX</type>
-                                    <params>FP:([A-F0-9]+)
+								</step>
+							</preprocessing>
+							<master_item>
+								<key>sslcert.master[{#SSLCERTURI}]</key>
+							</master_item>
+							<request_method>POST</request_method>
+							<trigger_prototypes>
+								<trigger_prototype>
+									<expression>{last()}&lt;0</expression>
+									<name>Certificate {#SSLCERTURI} expired</name>
+									<priority>DISASTER</priority>
+									<dependencies>
+										<dependency>
+											<name>Certificate {#SSLCERTURI} Fingerprint could not be determined</name>
+											<expression>{Template SSL Certificates:sslcert.fingerprint[{#SSLCERTURI}].str(&quot;ERR&quot;)}=1</expression>
+										</dependency>
+									</dependencies>
+								</trigger_prototype>
+								<trigger_prototype>
+									<expression>{last()}&lt;432000</expression>
+									<name>Certificate {#SSLCERTURI} will expire in 5 days</name>
+									<priority>HIGH</priority>
+									<dependencies>
+										<dependency>
+											<name>Certificate {#SSLCERTURI} expired</name>
+											<expression>{Template SSL Certificates:sslcert.expiration[{#SSLCERTURI}].last()}&lt;0</expression>
+										</dependency>
+									</dependencies>
+								</trigger_prototype>
+								<trigger_prototype>
+									<expression>{last()}&lt;1296000</expression>
+									<name>Certificate {#SSLCERTURI} will expire in 15 days</name>
+									<priority>AVERAGE</priority>
+									<dependencies>
+										<dependency>
+											<name>Certificate {#SSLCERTURI} will expire in 5 days</name>
+											<expression>{Template SSL Certificates:sslcert.expiration[{#SSLCERTURI}].last()}&lt;432000</expression>
+										</dependency>
+									</dependencies>
+								</trigger_prototype>
+								<trigger_prototype>
+									<expression>{last()}&lt;2592000</expression>
+									<name>Certificate {#SSLCERTURI} will expire in 30 days</name>
+									<priority>WARNING</priority>
+									<dependencies>
+										<dependency>
+											<name>Certificate {#SSLCERTURI} will expire in 15 days</name>
+											<expression>{Template SSL Certificates:sslcert.expiration[{#SSLCERTURI}].last()}&lt;1296000</expression>
+										</dependency>
+									</dependencies>
+								</trigger_prototype>
+							</trigger_prototypes>
+						</item_prototype>
+						<item_prototype>
+							<name>Certificate {#SSLCERTURI} Fingerprint</name>
+							<type>DEPENDENT</type>
+							<key>sslcert.fingerprint[{#SSLCERTURI}]</key>
+							<delay>0</delay>
+							<history>7d</history>
+							<trends>0</trends>
+							<value_type>TEXT</value_type>
+							<applications>
+								<application>
+									<name>SSL Certificates</name>
+								</application>
+							</applications>
+							<preprocessing>
+								<step>
+									<type>REGEX</type>
+									<params>FP:([A-F0-9]+)
 \1</params>
-                                </step>
-                            </preprocessing>
-                            <master_item>
-                                <key>sslcert.master[{#SSLCERTURI}]</key>
-                            </master_item>
-                            <request_method>POST</request_method>
-                            <trigger_prototypes>
-                                <trigger_prototype>
-                                    <expression>{change()}&lt;&gt;0</expression>
-                                    <name>Certificate {#SSLCERTURI} Fingerprint changed</name>
-                                    <priority>INFO</priority>
-                                </trigger_prototype>
-                                <trigger_prototype>
-                                    <expression>{str(&quot;ERR&quot;)}=1</expression>
-                                    <name>Certificate {#SSLCERTURI} Fingerprint could not be determined</name>
-                                    <priority>WARNING</priority>
-                                </trigger_prototype>
-                            </trigger_prototypes>
-                        </item_prototype>
-                        <item_prototype>
-                            <name>Certificate {#SSLCERTURI} master item</name>
-                            <key>sslcert.master[{#SSLCERTURI}]</key>
-                            <delay>30s</delay>
-                            <history>7d</history>
-                            <trends>0</trends>
-                            <value_type>TEXT</value_type>
-                            <applications>
-                                <application>
-                                    <name>SSL Certificates</name>
-                                </application>
-                            </applications>
-                            <request_method>POST</request_method>
-                        </item_prototype>
-                    </item_prototypes>
-                    <request_method>POST</request_method>
-                </discovery_rule>
-            </discovery_rules>
-        </template>
-    </templates>
+								</step>
+							</preprocessing>
+							<master_item>
+								<key>sslcert.master[{#SSLCERTURI}]</key>
+							</master_item>
+							<request_method>POST</request_method>
+							<trigger_prototypes>
+								<trigger_prototype>
+									<expression>{change()}&lt;&gt;0</expression>
+									<recovery_mode>NONE</recovery_mode>
+									<name>Certificate {#SSLCERTURI} Fingerprint changed</name>
+									<priority>INFO</priority>
+									<manual_close>YES</manual_close>
+								</trigger_prototype>
+								<trigger_prototype>
+									<expression>{str(&quot;ERR&quot;)}=1</expression>
+									<name>Certificate {#SSLCERTURI} Fingerprint could not be determined</name>
+									<priority>WARNING</priority>
+								</trigger_prototype>
+							</trigger_prototypes>
+						</item_prototype>
+						<item_prototype>
+							<name>Certificate {#SSLCERTURI} master item</name>
+							<key>sslcert.master[{#SSLCERTURI}]</key>
+							<delay>30s</delay>
+							<history>7d</history>
+							<trends>0</trends>
+							<value_type>TEXT</value_type>
+							<applications>
+								<application>
+									<name>SSL Certificates</name>
+								</application>
+							</applications>
+							<request_method>POST</request_method>
+						</item_prototype>
+					</item_prototypes>
+					<request_method>POST</request_method>
+				</discovery_rule>
+			</discovery_rules>
+		</template>
+	</templates>
 </zabbix_export>
