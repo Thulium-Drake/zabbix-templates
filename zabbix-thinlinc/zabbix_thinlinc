@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# Zabbix agent extension for monitoring Thinlinc license usage
+
+. /etc/zabbix/zabbix-thinlinc.conf
+BUFFER=/tmp/zabbix-thinlinc
+SOFTWARE="sed"
+
+function getdata() {
+   mkdir $BUFFER.$$; chmod 0750 $BUFFER.$$
+   cd $BUFFER.$$
+
+   LICINFO=$($TLLIC | head -n1 | sed 's/^[^0-9]*\([0-9][0-9]*\)[^0-9]*\([0-9][0-9]*\)[^0-9]*/\1,\2/')
+   echo ${LICINFO%%,*} > licensecount
+   echo ${LICINFO##*,} > hardlimit
+
+   $TLUSED | tail -n1 | sed 's/.*[^0-9]\([0-9][0-9]* licenses\).*/\1/' | cut -d' ' -f1 > sessioncount
+
+   test -d $BUFFER && mv $BUFFER $BUFFER.old
+   mv $BUFFER.$$ $BUFFER
+   rm -rf $BUFFER.old
+}
+
+function sanity_check() {
+   ok=1
+   for prog in $SOFTWARE
+   do
+      which $prog > /dev/null || { echo "Missing program $prog."; ok=0; }
+   done
+   test -f $CFG || { echo "Missing configfile $CFG"; ok=0; }
+   test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+}
+
+sanity_check
+
+action=$1
+
+case "$action" in
+getdata)
+	getdata
+;;
+thinlinc.hardlimit)
+   test -f $BUFFER/hardlimit && cat $BUFFER/hardlimit
+;;
+thinlinc.licensecount)
+   test -f $BUFFER/licensecount && cat $BUFFER/licensecount
+;;
+thinlinc.sessioncount)
+   test -f $BUFFER/sessioncount && cat $BUFFER/sessioncount
+;;
+esac
