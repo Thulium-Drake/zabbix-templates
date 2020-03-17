@@ -5,6 +5,7 @@
 . /etc/zabbix/zabbix-thinlinc.conf
 BUFFER=/tmp/zabbix-thinlinc
 SOFTWARE="sed"
+USER="zabbix"
 
 function getdata() {
    mkdir $BUFFER.$$; chmod 0750 $BUFFER.$$
@@ -15,6 +16,8 @@ function getdata() {
    echo ${LICINFO##*,} > hardlimit
 
    $TLUSED | tail -n1 | sed 's/.*[^0-9]\([0-9][0-9]* licenses\).*/\1/' | cut -d' ' -f1 > sessioncount
+
+   chown -R $USER: $BUFFER.$$
 
    test -d $BUFFER && mv $BUFFER $BUFFER.old
    mv $BUFFER.$$ $BUFFER
