@@ -1,0 +1,93 @@
+<?xml version="1.0" ?>
+<zabbix_export>
+	<version>4.4</version>
+	<date>2018-01-01T01:01:01Z</date>
+	<groups>
+		<group>
+			<name>Templates</name>
+		</group>
+	</groups>
+	<templates>
+		<template>
+			<template>Template App Thinlinc</template>
+			<name>Template App Thinlinc</name>
+			<groups>
+				<group>
+					<name>Templates</name>
+				</group>
+			</groups>
+			<applications>
+				<application>
+					<name>Thinlinc</name>
+				</application>
+			</applications>
+			<items>
+				<item>
+					<name>Thinlinc License Hard Limit</name>
+					<key>thinlinc.hardlimit</key>
+					<units>license</units>
+					<applications>
+						<application>
+							<name>Thinlinc</name>
+						</application>
+					</applications>
+				</item>
+				<item>
+					<name>Thinlinc License count</name>
+					<key>thinlinc.licensecount</key>
+					<units>license</units>
+					<applications>
+						<application>
+							<name>Thinlinc</name>
+						</application>
+					</applications>
+				</item>
+				<item>
+					<name>Thinlinc Session count</name>
+					<key>thinlinc.sessioncount</key>
+					<units>session</units>
+					<applications>
+						<application>
+							<name>Thinlinc</name>
+						</application>
+					</applications>
+				</item>
+			</items>
+		</template>
+	</templates>
+	<triggers>
+		<trigger>
+			<expression>{Template App Thinlinc:thinlinc.sessioncount.last()}&gt;={Template App Thinlinc:thinlinc.licensecount.last()}</expression>
+			<name>Thinlinc License limit reached</name>
+			<priority>WARNING</priority>
+		</trigger>
+	</triggers>
+	<graphs>
+		<graph>
+			<name>Thinlinc License usage</name>
+			<ymin_type_1>FIXED</ymin_type_1>
+			<ymax_type_1>ITEM</ymax_type_1>
+			<ymax_item_1>
+				<host>Template App Thinlinc</host>
+				<key>thinlinc.hardlimit</key>
+			</ymax_item_1>
+			<graph_items>
+				<graph_item>
+					<color>1A7C11</color>
+					<item>
+						<host>Template App Thinlinc</host>
+						<key>thinlinc.sessioncount</key>
+					</item>
+				</graph_item>
+				<graph_item>
+					<sortorder>1</sortorder>
+					<color>F63100</color>
+					<item>
+						<host>Template App Thinlinc</host>
+						<key>thinlinc.licensecount</key>
+					</item>
+				</graph_item>
+			</graph_items>
+		</graph>
+	</graphs>
+</zabbix_export>

@@ -10,6 +10,7 @@ Collection of templates for Zabbix and their supporting scripts
 * [zabbix_netstat](zabbix-netstat/): Linux interface statistics monitoring
 * [zabbix_sslcert](zabbix-sslcert/): SSL certificate validity
 * [zabbix_tapestats](zabbix-tapestats/): Tape drive throughput monitoring
+* [zabbix_thinlinc](zabbix-thinlinc/): Thinlinc License monitoring
 * [zabbix_urlcheck](zabbix-urlcheck/): URL connectivity monitoring
 
 Also check https://github.com/mverboom/zabbix-utils for another collection of very useful templates!
