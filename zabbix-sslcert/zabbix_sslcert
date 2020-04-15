@@ -11,9 +11,13 @@ function discover_sslcert() {
     cat $CFG | sed "/^#/d;s/#.*//" | while read line
     do
         IFS=, read host port starttls <<< $line
-        host_name=${host%%@*}
-        if test -f $BUFFER/${host_name}_${port}; then
+        if test "$host" == 'file'; then
+          jo {\#SSLCERTURI}=${port}
+        else
+          host_name=${host%%@*}
+          if test -f $BUFFER/${host_name}_${port}; then
             jo {\#SSLCERTURI}=${host_name}_${port}
+          fi
         fi
     done ) )
 }
@@ -25,12 +29,18 @@ function getdata() {
     cat $CFG | sed "/^#/d;s/#.*//" | while read line
     do
         IFS=, read host port starttls <<< $line
-        host_name=${host%%@*}
-        host_proxy=${host##*@}
-        if test "$host_name" == "$host_proxy"; then
-          unset host_proxy
+        if test "$host" == 'file'; then
+          certpath=$port
+          port=$(basename $certpath)
+          DATA=$(openssl x509 -in $certpath -noout -enddate -fingerprint 2>/dev/null || echo -e "notAfter=0 GMT\nFingerprint=ERR")
+        else
+          host_name=${host%%@*}
+          host_proxy=${host##*@}
+          if test "$host_name" == "$host_proxy"; then
+            unset host_proxy
+          fi
+          DATA=$(timeout 5 openssl s_client -connect ${host_name}:${port} $(test -n "$starttls" && echo "-starttls $starttls") $(test -n "$host_proxy" && echo "-proxy $host_proxy") -servername $host <<< "" 2>/dev/null | openssl x509 -noout -enddate -fingerprint 2>/dev/null || echo -e "notAfter=0 GMT\nFingerprint=ERR")
         fi
-        DATA=$(timeout 5 openssl s_client -connect ${host_name}:${port} $(test -n "$starttls" && echo "-starttls $starttls") $(test -n "$host_proxy" && echo "-proxy $host_proxy") -servername $host <<< "" 2>/dev/null | openssl x509 -noout -enddate -fingerprint 2>/dev/null || echo -e "notAfter=0 GMT\nFingerprint=ERR")
         CERTFP=$(echo ${DATA/*Fingerprint=/} | sed 's/://g')
         CERTEXP=${DATA%%GMT*}
         CERTEXP=$(($(date -d "${CERTEXP##*=}" +%s) - $(date +%s) ))

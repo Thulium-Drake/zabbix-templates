@@ -44,7 +44,16 @@ The configuration file is located at:
 
 The file contains one line for each certificate:
 
-hostname,port,starttls_proto
+  hostname[@proxyhost:8000],port,starttls_proto
+
+The proxy is optional and can be specified with a port to use.
+
+The starttls_proto must be one that is supported by OpenSSL.
+
+Alternatively, when the certificate file is available on the local filesystem
+it is possible to configure a this script to read that file instead.
+
+  file,/etc/ssl/certs/mycert.crt
 
 #### RUNNING
 
