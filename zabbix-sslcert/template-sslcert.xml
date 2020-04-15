@@ -65,8 +65,19 @@
 									</dependencies>
 								</trigger_prototype>
 								<trigger_prototype>
-									<expression>{last()}&lt;432000</expression>
-									<name>Certificate {#SSLCERTURI} will expire in 5 days</name>
+									<expression>{last()}&lt;{$EXP_AVG}</expression>
+									<name>Certificate {#SSLCERTURI} will expire in {$EXP_AVG}</name>
+									<priority>AVERAGE</priority>
+									<dependencies>
+										<dependency>
+											<name>Certificate {#SSLCERTURI} will expire in {$EXP_HIGH}</name>
+											<expression>{Template SSL Certificates:sslcert.expiration[{#SSLCERTURI}].last()}&lt;{$EXP_HIGH}</expression>
+										</dependency>
+									</dependencies>
+								</trigger_prototype>
+								<trigger_prototype>
+									<expression>{last()}&lt;{$EXP_HIGH}</expression>
+									<name>Certificate {#SSLCERTURI} will expire in {$EXP_HIGH}</name>
 									<priority>HIGH</priority>
 									<dependencies>
 										<dependency>
@@ -76,24 +87,13 @@
 									</dependencies>
 								</trigger_prototype>
 								<trigger_prototype>
-									<expression>{last()}&lt;1296000</expression>
-									<name>Certificate {#SSLCERTURI} will expire in 15 days</name>
-									<priority>AVERAGE</priority>
-									<dependencies>
-										<dependency>
-											<name>Certificate {#SSLCERTURI} will expire in 5 days</name>
-											<expression>{Template SSL Certificates:sslcert.expiration[{#SSLCERTURI}].last()}&lt;432000</expression>
-										</dependency>
-									</dependencies>
-								</trigger_prototype>
-								<trigger_prototype>
-									<expression>{last()}&lt;2592000</expression>
-									<name>Certificate {#SSLCERTURI} will expire in 30 days</name>
+									<expression>{last()}&lt;{$EXP_WARN}</expression>
+									<name>Certificate {#SSLCERTURI} will expire in {$EXP_WARN}</name>
 									<priority>WARNING</priority>
 									<dependencies>
 										<dependency>
-											<name>Certificate {#SSLCERTURI} will expire in 15 days</name>
-											<expression>{Template SSL Certificates:sslcert.expiration[{#SSLCERTURI}].last()}&lt;1296000</expression>
+											<name>Certificate {#SSLCERTURI} will expire in {$EXP_AVG}</name>
+											<expression>{Template SSL Certificates:sslcert.expiration[{#SSLCERTURI}].last()}&lt;{$EXP_AVG}</expression>
 										</dependency>
 									</dependencies>
 								</trigger_prototype>
@@ -156,6 +156,20 @@
 					<request_method>POST</request_method>
 				</discovery_rule>
 			</discovery_rules>
+			<macros>
+				<macro>
+					<macro>{$EXP_AVG}</macro>
+					<value>15d</value>
+				</macro>
+				<macro>
+					<macro>{$EXP_HIGH}</macro>
+					<value>5d</value>
+				</macro>
+				<macro>
+					<macro>{$EXP_WARN}</macro>
+					<value>30d</value>
+				</macro>
+			</macros>
 		</template>
 	</templates>
 </zabbix_export>
