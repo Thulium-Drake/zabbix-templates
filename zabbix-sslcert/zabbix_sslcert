@@ -14,7 +14,7 @@ function discover_sslcert() {
         if test "$host" == 'file'; then
           certpath=$port
           port=$(basename $certpath)
-          jo {\#SSLCERTURI}=${port}
+          jo {\#SSLCERTURI}=file_${port}
         else
           host_name=${host%%@*}
           if test -f $BUFFER/${host_name}_${port}; then
