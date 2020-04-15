@@ -44,7 +44,7 @@ The configuration file is located at:
 
 The file contains one line for each certificate:
 
-hostname,port
+hostname,port,starttls_proto
 
 #### RUNNING
 
