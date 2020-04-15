@@ -12,6 +12,8 @@ function discover_sslcert() {
     do
         IFS=, read host port starttls <<< $line
         if test "$host" == 'file'; then
+          certpath=$port
+          port=$(basename $certpath)
           jo {\#SSLCERTURI}=${port}
         else
           host_name=${host%%@*}
