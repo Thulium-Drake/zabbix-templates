@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<zabbix_export>
+	<version>4.4</version>
+	<date>2018-01-01T01:01:01Z</date>
+	<groups>
+		<group>
+			<name>Templates</name>
+		</group>
+	</groups>
+	<templates>
+		<template>
+			<template>Template Kernel Modules</template>
+			<name>Template Kernel Modules</name>
+			<groups>
+				<group>
+					<name>Templates</name>
+				</group>
+			</groups>
+			<applications>
+				<application>
+					<name>Kernel Modules</name>
+				</application>
+			</applications>
+			<items>
+				<item>
+					<name>Loaded kernel modules</name>
+					<key>kmod.loaded-modules</key>
+					<trends>0</trends>
+					<value_type>TEXT</value_type>
+					<applications>
+						<application>
+							<name>Kernel Modules</name>
+						</application>
+					</applications>
+					<triggers>
+						<trigger>
+							<expression>{regexp({$REQUIRED_MODULES})}=0</expression>
+							<name>Required kernel module not loaded</name>
+							<priority>WARNING</priority>
+							<description>One of the following modules has not been loaded in the system:
+
+{$REQUIRED_MODULES}</description>
+						</trigger>
+						<trigger>
+							<expression>{regexp({$UNWANTED_MODULES})}=1</expression>
+							<name>Unwanted kernel module loaded</name>
+							<priority>WARNING</priority>
+							<description>One of the following modules has been loaded in the system:
+
+{$UNWANTED_MODULES}</description>
+						</trigger>
+					</triggers>
+				</item>
+			</items>
+			<macros>
+				<macro>
+					<macro>{$REQUIRED_MODULES}</macro>
+					<value>^(video|tcp_diag)$</value>
+					<description>These modules must be present</description>
+				</macro>
+				<macro>
+					<macro>{$UNWANTED_MODULES}</macro>
+					<value>^(nouveau|nvidia)$</value>
+					<description>These modules must NOT be present</description>
+				</macro>
+			</macros>
+		</template>
+	</templates>
+</zabbix_export>

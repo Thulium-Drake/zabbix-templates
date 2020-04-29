@@ -5,6 +5,9 @@
 BUFFER=/tmp/zabbix-kmod
 SOFTWARE="sed"
 
+# Add /usr/sbin to PATH to make this run on RHEL based systems
+PATH="$PATH:/usr/sbin"
+
 function getdata() {
    mkdir $BUFFER.$$; chmod 750 $BUFFER.$$
    cd $BUFFER.$$
@@ -29,7 +32,6 @@ function sanity_check() {
 sanity_check
 
 action=$1
-arg=$2
 
 case "$action" in
     getdata)
