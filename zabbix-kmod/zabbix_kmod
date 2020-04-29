@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+# Zabbix agent extension for monitoring which kernel modules are loaded
+
+BUFFER=/tmp/zabbix-kmod
+SOFTWARE="sed"
+
+function getdata() {
+   mkdir $BUFFER.$$; chmod 750 $BUFFER.$$
+   cd $BUFFER.$$
+
+   lsmod | sed '1d; s/ .*//' > loaded_modules
+
+   test -d $BUFFER && mv $BUFFER $BUFFER.old
+   mv $BUFFER.$$ $BUFFER
+   rm -rf $BUFFER.old
+}
+
+function sanity_check() {
+   ok=1
+   for prog in $SOFTWARE
+   do
+      which $prog > /dev/null || { echo "Missing program $prog."; ok=0; }
+   done
+   test -f $CONFIG || { echo "Missing configfile $CONFIG"; ok=0; }
+   test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+}
+
+sanity_check
+
+action=$1
+arg=$2
+
+case "$action" in
+    getdata)
+        getdata
+        ;;
+    kmod.loaded-modules)
+        test -f $BUFFER/loaded_modules && cat $BUFFER/loaded_modules
+        ;;
+esac
