@@ -1,10 +1,10 @@
 # NAME
 
-zabbix_bondmon - retrieve linux bond slave status for zabbix.
+zabbix_nvidia_mem - retrieve memory statistics from nvidia gpus for zabbix
 
 # SYNOPSIS
 
-`zabbix_bondmon [option]`
+`zabbix_nvidia_mem [option]`
 
 # DESCRIPTION
 
@@ -17,21 +17,23 @@ need to be done.
 
 ## AGENT CONFIGURATION
 
-### ZABBIX_BONDMON INSTALLATION
+### ZABBIX_NVDIA_MEM INSTALLATION
 
 The command needs to be installed on one or more zabbix agents. The default location
 referenced in all files in this repository is:
 
-`/usr/local/bin/zabbix_bondmon`
+`/usr/local/bin/zabbix_nvidia_mem`
 
 In order for this command to work, the following software needs to be available:
 
 * jo
+* nvidia-smi
+* sed
 
-### ZABBIX_BONDMON CONFIGURATION
+### ZABBIX_NVDIA_MEM CONFIGURATION
 
 There is no configuration required for this command. The command will detect which
-bond interfaces are available in /proc/net/bonding and gather statusses for all of them.
+gpus are available with nvidia-smi and gather statistics for all of them
 
 #### RUNNING
 
@@ -39,15 +41,15 @@ It is best to run the command from cron.
 
 In order to create statistics the command needs to be run with the getdata option:
 
-`/usr/local/bin/zabbix_bondmon getdata`
+`/usr/local/bin/zabbix_nvidia_mem getdata`
 
 The output data of the command will be stored in:
 
-`/tmp/zabbix-bondmon`
+`/tmp/zabbix-nvidia-mem`
 
 A useful crontab entry would be:
 
-`* * * * * /usr/local/bin/zabbix_bondmon getdata`
+`* * * * * /usr/local/bin/zabbix_nvidia_mem getdata`
 
 ### CONFIGURING ZABBIX AGENT
 
@@ -55,7 +57,7 @@ Now that the information is being gathered, the zabbix agent needs to be made aw
 of how the information can be retrieved. A configuration file is available in the
 repository and should be installed at:
 
-`/etc/zabbix/zabbix_agentd.d/zabbix_agent-bondmon.conf`
+`/etc/zabbix/zabbix_agentd.d/zabbix_agent-nvidia-mem.conf`
 
 After the configuration has been added, reload the agent
 
@@ -69,7 +71,7 @@ template needs to be imported.
 * Open the zabbix webinterface
 * Go to Configuration -> Templates
 * Choose Import
-* Choose browse and select the `template-bondmon.xml` file in the file browser.
+* Choose browse and select the `template-nvidia-mem.xml` file in the file browser.
 * Make any require changes to rules
 * Select Import
 
@@ -80,7 +82,7 @@ agent that has been configuratie with the command follow the steps below.
 * Go to Configuration -> Hosts
 * Select the name of the host to configure
 * Go to templates
-* Choose Template Linux Bond monitoring at the Link new templates box
+* Choose Template Nvidia Memory monitoring at the Link new templates box
 * Choose Add
 * Choose Update
 
@@ -88,8 +90,8 @@ Zabbix should now start collecting data.
 
 # FILES
 
-`/usr/local/bin/zabbix_bondmon` Command
-`/etc/zabbix/zabbix-agentd.d/zabbix_agent-bondmon.conf` Agent configuration file
+`/usr/local/bin/zabbix_nvidia_mem` Command
+`/etc/zabbix/zabbix-agentd.d/zabbix_agent-nvidia-mem.conf` Agent configuration file
 
 # EXAMPLES
 

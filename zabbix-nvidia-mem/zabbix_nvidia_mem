@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# Zabbix agent extension for monitoring Nvidia GPU memory usage
+
+BUFFER=/tmp/zabbix-nvidia-mem
+SOFTWARE="jo sed nvidia-smi"
+
+function discover_gpus() {
+   jo -p data=$( jo -a $(
+   for gpu in $(nvidia-smi -L | sed 's/GPU //; s/:.*//')
+   do
+      if test -f $BUFFER/gpu_$gpu; then
+        name=$(sed -n 's/name: //p' $BUFFER/gpu_$gpu)
+        jo {\#GPU}=${gpu} {\#NAME}=${name}
+      fi
+   done ) )
+}
+
+function getdata() {
+   mkdir $BUFFER.$$; chmod 750 $BUFFER.$$
+   cd $BUFFER.$$
+
+   for gpu in $(nvidia-smi -L | sed 's/GPU //; s/:.*//')
+   do
+     echo "name: $(nvidia-smi -L | sed 's/GPU [0-9]: //; s/ (.*//;s/ /_/g')" > gpu_$gpu
+     nvidia-smi -q -i $gpu -d MEMORY | grep 'FB Memory Usage' -A2 | sed '1d; s/.*: //;s/ MiB//;2s/^/fb_total: /; 3s/^/fb_used: /' >> gpu_$gpu
+     nvidia-smi -q -i $gpu -d MEMORY | grep 'BAR1 Memory Usage' -A2 | sed '1d; s/.*: //;s/ MiB//;2s/^/bar1_total: /; 3s/^/bar1_used: /' >> gpu_$gpu
+   done
+
+   test -d $BUFFER && mv $BUFFER $BUFFER.old
+   mv $BUFFER.$$ $BUFFER
+   rm -rf $BUFFER.old
+}
+
+function sanity_check() {
+   ok=1
+   for prog in $SOFTWARE
+   do
+      which $prog > /dev/null || { echo "Missing program $prog."; ok=0; }
+   done
+   test -f $CONFIG || { echo "Missing configfile $CONFIG"; ok=0; }
+   test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+}
+
+sanity_check
+
+action=$1
+gpu=$2
+
+case "$action" in
+    getdata)
+        getdata
+        ;;
+    nvidia_mem.discover)
+        discover_gpus
+        ;;
+    nvidia_mem.master)
+        test -f $BUFFER/gpu_$gpu && cat $BUFFER/gpu_$gpu
+        ;;
+esac
