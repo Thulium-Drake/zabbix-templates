@@ -6,7 +6,9 @@ Collection of templates for Zabbix and their supporting scripts
 * [zabbix_catialic](zabbix-catialic/): CATIA License monitoring
 * [zabbix_diskstats](zabbix-diskstats/): Linux disk I/O monitoring
 * [zabbix_flexlm](zabbix-flexlm/): FlexLM License monitoring
+* [zabbix_kmod](zabbix-kmod/): Kernel Module monitoring
 * [zabbix_mailflow](zabbix-mailflow/): Mailflow monitoring
+* [zabbix_nvidia_mem](zabbix-nvidia-mem/): Nvidia GPU memory monitoring
 * [zabbix_netstat](zabbix-netstat/): Linux interface statistics monitoring
 * [zabbix_sslcert](zabbix-sslcert/): SSL certificate validity
 * [zabbix_tapestats](zabbix-tapestats/): Tape drive throughput monitoring
