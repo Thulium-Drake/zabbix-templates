@@ -82,7 +82,7 @@ agent that has been configuratie with the command follow the steps below.
 * Go to Configuration -> Hosts
 * Select the name of the host to configure
 * Go to templates
-* Choose Template Nvidia Memory monitoring at the Link new templates box
+* Choose Template Nvidia Memory at the Link new templates box
 * Choose Add
 * Choose Update
 
@@ -97,7 +97,7 @@ Zabbix should now start collecting data.
 
 Check the output for discovery of bonds:
 
-`/usr/local/bin/zabbix_bondmon bondmon.discover`
+`/usr/local/bin/zabbix_bondmon nvidia_mem.discover`
 
 # AUTHOR
 
