@@ -51,10 +51,10 @@ case "$action" in
     getdata)
         getdata
         ;;
-    nvidia_mem.discover)
+    nvidia-mem.discover)
         discover_gpus
         ;;
-    nvidia_mem.master)
+    nvidia-mem.master)
         test -f $BUFFER/gpu_$gpu && cat $BUFFER/gpu_$gpu
         ;;
 esac
