@@ -1,0 +1,199 @@
+<?xml version="1.0" ?>
+<zabbix_export>
+	<version>4.4</version>
+	<date>2018-01-01T01:01:01Z</date>
+	<groups>
+		<group>
+			<name>Templates</name>
+		</group>
+	</groups>
+	<templates>
+		<template>
+			<template>Template Nvidia Memory</template>
+			<name>Template Nvidia Memory</name>
+			<groups>
+				<group>
+					<name>Templates</name>
+				</group>
+			</groups>
+			<applications>
+				<application>
+					<name>GPU memory</name>
+				</application>
+			</applications>
+			<discovery_rules>
+				<discovery_rule>
+					<name>GPU discovery</name>
+					<key>nvidia-mem.discover</key>
+					<item_prototypes>
+						<item_prototype>
+							<name>GPU {#GPU} - {#NAME} - BAR1 total memory</name>
+							<type>DEPENDENT</type>
+							<key>nvidia-mem.bar1.total[{#GPU}]</key>
+							<delay>0</delay>
+							<units>B</units>
+							<applications>
+								<application>
+									<name>GPU memory</name>
+								</application>
+							</applications>
+							<preprocessing>
+								<step>
+									<type>REGEX</type>
+									<params>bar1_total:(.+)
+\1</params>
+								</step>
+								<step>
+									<type>MULTIPLIER</type>
+									<params>1048576</params>
+								</step>
+							</preprocessing>
+							<master_item>
+								<key>nvidia-mem.master[{#GPU}]</key>
+							</master_item>
+						</item_prototype>
+						<item_prototype>
+							<name>GPU {#GPU} - {#NAME} - BAR1 used memory</name>
+							<type>DEPENDENT</type>
+							<key>nvidia-mem.bar1.used[{#GPU}]</key>
+							<delay>0</delay>
+							<units>B</units>
+							<applications>
+								<application>
+									<name>GPU memory</name>
+								</application>
+							</applications>
+							<preprocessing>
+								<step>
+									<type>REGEX</type>
+									<params>bar1_used:(.+)
+\1</params>
+								</step>
+								<step>
+									<type>MULTIPLIER</type>
+									<params>1048576</params>
+								</step>
+							</preprocessing>
+							<master_item>
+								<key>nvidia-mem.master[{#GPU}]</key>
+							</master_item>
+						</item_prototype>
+						<item_prototype>
+							<name>GPU {#GPU} - {#NAME} - FB total memory</name>
+							<type>DEPENDENT</type>
+							<key>nvidia-mem.fb.total[{#GPU}]</key>
+							<delay>0</delay>
+							<units>B</units>
+							<applications>
+								<application>
+									<name>GPU memory</name>
+								</application>
+							</applications>
+							<preprocessing>
+								<step>
+									<type>REGEX</type>
+									<params>fb_total:(.+)
+\1</params>
+								</step>
+								<step>
+									<type>MULTIPLIER</type>
+									<params>1048576</params>
+								</step>
+							</preprocessing>
+							<master_item>
+								<key>nvidia-mem.master[{#GPU}]</key>
+							</master_item>
+						</item_prototype>
+						<item_prototype>
+							<name>GPU {#GPU} - {#NAME} - FB used memory</name>
+							<type>DEPENDENT</type>
+							<key>nvidia-mem.fb.used[{#GPU}]</key>
+							<delay>0</delay>
+							<units>B</units>
+							<applications>
+								<application>
+									<name>GPU memory</name>
+								</application>
+							</applications>
+							<preprocessing>
+								<step>
+									<type>REGEX</type>
+									<params>fb_used:(.+)
+\1</params>
+								</step>
+								<step>
+									<type>MULTIPLIER</type>
+									<params>1048576</params>
+								</step>
+							</preprocessing>
+							<master_item>
+								<key>nvidia-mem.master[{#GPU}]</key>
+							</master_item>
+						</item_prototype>
+						<item_prototype>
+							<name>GPU {#GPU} - {#NAME} - master item</name>
+							<key>nvidia-mem.master[{#GPU}]</key>
+							<trends>0</trends>
+							<value_type>TEXT</value_type>
+						</item_prototype>
+					</item_prototypes>
+					<trigger_prototypes>
+						<trigger_prototype>
+							<expression>{Template Nvidia Memory:nvidia-mem.bar1.used[{#GPU}].last()} / {Template Nvidia Memory:nvidia-mem.bar1.total[{#GPU}].last()} &gt; 0.9</expression>
+							<recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+							<recovery_expression>{Template Nvidia Memory:nvidia-mem.bar1.used[{#GPU}].last()} / {Template Nvidia Memory:nvidia-mem.bar1.total[{#GPU}].last()} &lt; 0.8</recovery_expression>
+							<name>GPU {#GPU} - {#NAME} - BAR1 memory used &gt; 90%</name>
+							<priority>WARNING</priority>
+						</trigger_prototype>
+						<trigger_prototype>
+							<expression>{Template Nvidia Memory:nvidia-mem.fb.used[{#GPU}].last()} / {Template Nvidia Memory:nvidia-mem.fb.total[{#GPU}].last()} &gt; 0.9</expression>
+							<recovery_mode>RECOVERY_EXPRESSION</recovery_mode>
+							<recovery_expression>{Template Nvidia Memory:nvidia-mem.fb.used[{#GPU}].last()} / {Template Nvidia Memory:nvidia-mem.fb.total[{#GPU}].last()} &lt; 0.8</recovery_expression>
+							<name>GPU {#GPU} - {#NAME} - FB memory used &gt; 90%</name>
+							<priority>WARNING</priority>
+						</trigger_prototype>
+					</trigger_prototypes>
+					<graph_prototypes>
+						<graph_prototype>
+							<name>GPU {#GPU} - {#NAME} - Memory usage</name>
+							<ymin_type_1>FIXED</ymin_type_1>
+							<graph_items>
+								<graph_item>
+									<color>1A7C11</color>
+									<item>
+										<host>Template Nvidia Memory</host>
+										<key>nvidia-mem.bar1.total[{#GPU}]</key>
+									</item>
+								</graph_item>
+								<graph_item>
+									<sortorder>1</sortorder>
+									<color>F63100</color>
+									<item>
+										<host>Template Nvidia Memory</host>
+										<key>nvidia-mem.bar1.used[{#GPU}]</key>
+									</item>
+								</graph_item>
+								<graph_item>
+									<sortorder>2</sortorder>
+									<color>2774A4</color>
+									<item>
+										<host>Template Nvidia Memory</host>
+										<key>nvidia-mem.fb.total[{#GPU}]</key>
+									</item>
+								</graph_item>
+								<graph_item>
+									<sortorder>3</sortorder>
+									<color>A54F10</color>
+									<item>
+										<host>Template Nvidia Memory</host>
+										<key>nvidia-mem.fb.used[{#GPU}]</key>
+									</item>
+								</graph_item>
+							</graph_items>
+						</graph_prototype>
+					</graph_prototypes>
+				</discovery_rule>
+			</discovery_rules>
+		</template>
+	</templates>
+</zabbix_export>
