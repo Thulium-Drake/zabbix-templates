@@ -4,10 +4,18 @@
 
 . /etc/zabbix/zabbix-ldap.conf
 BUFFER=/tmp/zabbix-ldap
-SOFTWARE="ldapwhoami awk"
+SOFTWARE="jo ldapwhoami awk"
+
+function discover_ldap() {
+   jo -p data=$(jo -a $(
+   for host in $LDAP_HOSTS do
+     jo {\#LDAPHOST}=$host
+   done ) )
+}
 
 function getdata() {
    mkdir $BUFFER.$$; chmod 0750 $BUFFER.$$
+   chown zabbix:zabbix $BUFFER.$$
    cd $BUFFER.$$
 
    for host in $LDAP_HOSTS
@@ -36,10 +44,13 @@ action=$1
 host=$2
 
 case "$action" in
-getdata)
-	getdata
-;;
-ldap.master)
-   test -f $BUFFER/$host && cat $BUFFER/$host
-;;
+  getdata)
+    getdata
+    ;;
+  ldap.discover)
+    discover_ldap
+    ;;
+  ldap.master)
+    test -f $BUFFER/$host && cat $BUFFER/$host
+    ;;
 esac
