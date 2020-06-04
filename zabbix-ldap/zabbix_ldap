@@ -12,7 +12,7 @@ function getdata() {
 
    for host in $LDAP_HOSTS
    do
-     (time ldapwhoami -H ldap://$host -ZZ -D $BIND_DN -w $BIND_PW -v ) 2>&1 | egrep 'Result|real' | awk -e '{ if ($1 == "Result:") {gsub(/[()]/, "", $3); printf("result:%s\n", $3) }; if ($1 == "ldap_bind:")  {gsub(/[()]/, "", $4); printf("result:%s\n", $4) }; if ($1 == "real") { gsub(/0m/, "", $2); gsub(/s$/, "", $2); printf("time:%s", $2) } }' > $host
+     (time ldapwhoami -H ldap://$host -ZZ -D $BIND_DN -w $BIND_PW -v ) 2>&1 | awk -e '{ if ($1 == "Result:") {gsub(/[()]/, "", $3); printf("result:%s\n", $3) }; if ($1 == "ldap_bind:")  {gsub(/[()]/, "", $4); printf("result:%s\n", $4) }; if ($1 == "real") { gsub(/0m/, "", $2); gsub(/s$/, "", $2); printf("time:%s", $2) } }' > $host
    done
 
    test -d $BUFFER && mv $BUFFER $BUFFER.old
