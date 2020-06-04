@@ -8,7 +8,8 @@ SOFTWARE="jo ldapwhoami awk"
 
 function discover_ldap() {
    jo -p data=$(jo -a $(
-   for host in $LDAP_HOSTS do
+   for host in $LDAP_HOSTS
+   do
      jo {\#LDAPHOST}=$host
    done ) )
 }
