@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <zabbix_export>
-	<version>4.4</version>
+	<version>5.0</version>
 	<date>2018-01-01T01:01:01Z</date>
 	<groups>
 		<group>
@@ -115,7 +115,7 @@
 							<preprocessing>
 								<step>
 									<type>REGEX</type>
-									<params>FP:([A-F0-9]+)
+									<params>FP:([A-FR0-9]+)
 \1</params>
 								</step>
 							</preprocessing>
@@ -130,6 +130,12 @@
 									<name>Certificate {#SSLCERTURI} Fingerprint changed</name>
 									<priority>INFO</priority>
 									<manual_close>YES</manual_close>
+									<dependencies>
+										<dependency>
+											<name>Certificate {#SSLCERTURI} Fingerprint could not be determined</name>
+											<expression>{Template SSL Certificates:sslcert.fingerprint[{#SSLCERTURI}].str(&quot;ERR&quot;)}=1</expression>
+										</dependency>
+									</dependencies>
 								</trigger_prototype>
 								<trigger_prototype>
 									<expression>{str(&quot;ERR&quot;)}=1</expression>

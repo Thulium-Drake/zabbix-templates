@@ -3,7 +3,7 @@
 This template can be used on any Zabbix agent running on a Linux system. The
 template aims to give insight in the configured SSL certificates.
 
-This template requires at least Zabbix version 3.4.
+This template requires at least Zabbix version 5.0.
 
 The template collects:
 * Certificate fingerprint
