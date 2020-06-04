@@ -1,0 +1,111 @@
+<?xml version="1.0" ?>
+<zabbix_export>
+	<version>5.0</version>
+	<date>2018-01-01T01:01:01Z</date>
+	<groups>
+		<group>
+			<name>Templates</name>
+		</group>
+	</groups>
+	<templates>
+		<template>
+			<template>Template App LDAP</template>
+			<name>Template App LDAP</name>
+			<groups>
+				<group>
+					<name>Templates</name>
+				</group>
+			</groups>
+			<applications>
+				<application>
+					<name>LDAP</name>
+				</application>
+			</applications>
+			<discovery_rules>
+				<discovery_rule>
+					<name>LDAP servers</name>
+					<key>ldap.discover</key>
+					<delay>30s</delay>
+					<item_prototypes>
+						<item_prototype>
+							<name>Authentication result</name>
+							<type>DEPENDENT</type>
+							<key>ldap.authresult[{#LDAPHOST}]</key>
+							<delay>0</delay>
+							<value_type>FLOAT</value_type>
+							<applications>
+								<application>
+									<name>LDAP</name>
+								</application>
+							</applications>
+							<preprocessing>
+								<step>
+									<type>REGEX</type>
+									<params>result:(-?[0-9]+)
+\1</params>
+								</step>
+							</preprocessing>
+							<master_item>
+								<key>ldap.master[{#LDAPHOST}]</key>
+							</master_item>
+							<trigger_prototypes>
+								<trigger_prototype>
+									<expression>{last()}&lt;&gt;0</expression>
+									<name>LDAP Authentication failed on {#LDAPHOST}</name>
+									<priority>HIGH</priority>
+								</trigger_prototype>
+							</trigger_prototypes>
+						</item_prototype>
+						<item_prototype>
+							<name>Authentication time</name>
+							<type>DEPENDENT</type>
+							<key>ldap.authtime[{#LDAPHOST}]</key>
+							<delay>0</delay>
+							<value_type>FLOAT</value_type>
+							<units>s</units>
+							<applications>
+								<application>
+									<name>LDAP</name>
+								</application>
+							</applications>
+							<preprocessing>
+								<step>
+									<type>REGEX</type>
+									<params>time:(-?[.0-9]+)
+\1</params>
+								</step>
+							</preprocessing>
+							<master_item>
+								<key>ldap.master[{#LDAPHOST}]</key>
+							</master_item>
+							<trigger_prototypes>
+								<trigger_prototype>
+									<expression>{last()}&gt;2</expression>
+									<name>LDAP Authentication slow on {#LDAPHOST}</name>
+									<priority>WARNING</priority>
+									<dependencies>
+										<dependency>
+											<name>LDAP Authentication failed on {#LDAPHOST}</name>
+											<expression>{Template App LDAP:ldap.authresult[{#LDAPHOST}].last()}&lt;&gt;0</expression>
+										</dependency>
+									</dependencies>
+								</trigger_prototype>
+							</trigger_prototypes>
+						</item_prototype>
+						<item_prototype>
+							<name>{#LDAPHOST} Master item</name>
+							<key>ldap.master[{#LDAPHOST}]</key>
+							<trends>0</trends>
+							<value_type>TEXT</value_type>
+							<applications>
+								<application>
+									<name>LDAP</name>
+								</application>
+							</applications>
+						</item_prototype>
+					</item_prototypes>
+				</discovery_rule>
+			</discovery_rules>
+		</template>
+	</templates>
+</zabbix_export>
