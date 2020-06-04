@@ -7,6 +7,7 @@ Collection of templates for Zabbix and their supporting scripts
 * [zabbix_diskstats](zabbix-diskstats/): Linux disk I/O monitoring
 * [zabbix_flexlm](zabbix-flexlm/): FlexLM License monitoring
 * [zabbix_kmod](zabbix-kmod/): Kernel Module monitoring
+* [zabbix_ldap](zabbix-ldap/): LDAP monitoring
 * [zabbix_mailflow](zabbix-mailflow/): Mailflow monitoring
 * [zabbix_nvidia_mem](zabbix-nvidia-mem/): Nvidia GPU memory monitoring
 * [zabbix_netstat](zabbix-netstat/): Linux interface statistics monitoring
