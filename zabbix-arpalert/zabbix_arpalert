@@ -15,6 +15,7 @@ case "$TYPE" in
   0) # IP Change
     [ "${IP:0:8}" = "169.254." ] && exit 0 # To Zero-conf
     [ "${INFO:0:8}" = "169.254." ] && exit 0 # To Zero-conf
+    exit 0
     ;;
   1) # MAC detected not on whitelist
     exit 0
