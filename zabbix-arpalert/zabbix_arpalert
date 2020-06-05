@@ -53,4 +53,7 @@ grep TLSConnect=psk /etc/zabbix/zabbix_agentd.conf && {
 
 # Send the data to Zabbix
 /usr/bin/zabbix_sender $zabbixtls -z "$ZABBIXSRV" -s "$ZABBIXSRV" -k "arpalert.trap" \
-	-o "$TYPE $DEV $MAC $IP"
+	-o "type:$TYPE
+dev:$DEV
+mac:$MAC
+ip:$IP"
