@@ -1,0 +1,31 @@
+#!/bin/bash
+# This script will report any reported alert from arpalert to Zabbix using zabbix_sender
+
+. /etc/zabbix/zabbix-arpalert.conf
+
+MAC=$1
+IP=$2
+INFO=$3
+DEV=$4
+TYPE=$5
+VENDOR=$6
+
+case "$TYPE" in
+  0) # IP Change
+    [ "${IP:0:8}" = "169.254." ] && exit 0 # To Zero-conf
+    [ "${INFO:0:8}" = "169.254." ] && exit 0 # To Zero-conf
+    ;;
+  9) # Mac address change (can be bonding)
+    grep -qiE "[[:space:]]*$MAC[[:space:]]*$IP[[:space:]]" \
+      /etc/arpalert/maclist.allow && exit 0
+    ;;
+esac
+
+# If the agent is configured for TLS PSK
+grep TLSConnect=psk /etc/zabbix/zabbix_agentd.conf && {
+	zabbixtls="--tls-connect psk --tls-psk-identity "$(grep TLSPSKIdentity /etc/zabbix/zabbix_agentd.conf | cut -d= -f2)" --tls-psk-file /etc/zabbix/zabbix_agentd.key"
+}
+
+# Send the data to Zabbix
+/usr/bin/zabbix_sender $zabbixtls -z "$ZABBIXSRV" -s "$ZABBIXSRV" -k "arpalert.trap" \
+	-o "$TYPE $DEV $MAC $IP"

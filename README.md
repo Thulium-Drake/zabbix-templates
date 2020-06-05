@@ -2,6 +2,7 @@
 
 Collection of templates for Zabbix and their supporting scripts
 
+* [zabbix_arpalert](zabbix-arpalert/): ARP alert trapper
 * [zabbix_bondmon](zabbix-bondmon/): Linux bonding interface monitoring
 * [zabbix_catialic](zabbix-catialic/): CATIA License monitoring
 * [zabbix_diskstats](zabbix-diskstats/): Linux disk I/O monitoring
