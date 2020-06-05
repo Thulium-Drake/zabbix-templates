@@ -10,12 +10,37 @@ DEV=$4
 TYPE=$5
 VENDOR=$6
 
+# Process incoming alert, exit 0 when we do not report it to Zabbix
 case "$TYPE" in
   0) # IP Change
     [ "${IP:0:8}" = "169.254." ] && exit 0 # To Zero-conf
     [ "${INFO:0:8}" = "169.254." ] && exit 0 # To Zero-conf
     ;;
-  9) # Mac address change (can be bonding)
+  1) # MAC detected not on whitelist
+    exit 0
+    ;;
+  2) # Blacklisted MAC detected
+    exit 0
+    ;;
+  3) # New MAC detected
+    exit 0
+    ;;
+  4) # Unauthorized ARP request
+    exit 0
+    ;;
+  5) # Abusive number of ARP requests detected
+    exit 0
+    ;;
+  6) # Ethernet MAC address different from ARP MAC
+    exit 0
+    ;;
+  7) # Flood detected
+    exit 0
+    ;;
+  8) # New MAC address without IP address (sniffer)
+    exit 0
+    ;;
+  9) # MAC address change, check whitelist for bond interfaces
     grep -qiE "[[:space:]]*$MAC[[:space:]]*$IP[[:space:]]" \
       /etc/arpalert/maclist.allow && exit 0
     ;;
