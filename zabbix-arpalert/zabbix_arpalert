@@ -2,6 +2,8 @@
 # This script will report any reported alert from arpalert to Zabbix using zabbix_sender
 
 . /etc/zabbix/zabbix-arpalert.conf
+mkdir -p $BUFFER
+chmod 0755 $BUFFER
 
 MAC=$1
 IP=$2
@@ -9,6 +11,9 @@ INFO=$3
 DEV=$4
 TYPE=$5
 VENDOR=$6
+
+# Default message part
+MSG="type: $TYPE\ndev: $DEV\nip: $IP"
 
 # Process incoming alert, exit 0 when we do not report it to Zabbix
 case "$TYPE" in
@@ -42,19 +47,44 @@ case "$TYPE" in
     exit 0
     ;;
   9) # MAC address change, check whitelist for bond interfaces
+    echo 'type 9'
     grep -qiE "[[:space:]]*$MAC[[:space:]]*$IP[[:space:]]" \
       /etc/arpalert/maclist.allow && exit 0
+
+    # Gather all MACs from leases file
+    MACS=()
+    for i in $(grep $IP /var/lib/arpalert/arpalert.leases | sort -u | cut -d' ' -f1)
+    do
+      MACS+=($i)
+    done
+
+    for ((j=0; j<${#MACS[*]}; j++))
+    do
+      MSG="$MSG\nmac$j: ${MACS[j]}"
+    done
+
     ;;
 esac
+
+# SHA sum the message to check the age and limit the spammy-ness
+SHASUM=$(echo "$MSG" | sha1sum | cut -d' ' -f1)
 
 # If the agent is configured for TLS PSK
 grep TLSConnect=psk /etc/zabbix/zabbix_agentd.conf && {
 	zabbixtls="--tls-connect psk --tls-psk-identity "$(grep TLSPSKIdentity /etc/zabbix/zabbix_agentd.conf | cut -d= -f2)" --tls-psk-file /etc/zabbix/zabbix_agentd.key"
 }
 
-# Send the data to Zabbix
-/usr/bin/zabbix_sender $zabbixtls -z "$ZABBIXSRV" -s "$ZABBIXSRV" -k "arpalert.trap" \
-	-o "type:$TYPE
-dev:$DEV
-mac:$MAC
-ip:$IP"
+# Check if the last similar message sent is older then $COOLDOWN seconds
+AGE=$(( $(date +%s) - $(stat -L --format %Y $BUFFER/$SHASUM) ))
+if [[ ! -f $BUFFER/$SHASUM ]] || [[ $AGE -gt $COOLDOWN ]]
+then
+  # Update timestamp file
+  echo -e "$MSG" > $BUFFER/$SHASUM
+
+  # Send the data to Zabbix
+  /usr/bin/zabbix_sender $zabbixtls \
+    -z "$ZABBIXSRV" \
+    -s "$ZABBIXSRV" \
+    -k "arpalert.trap" \
+    -o "$(echo -e "$MSG")"
+fi

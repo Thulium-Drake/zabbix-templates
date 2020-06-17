@@ -1,0 +1,52 @@
+<?xml version="1.0" ?>
+<zabbix_export>
+	<version>5.0</version>
+	<date>2018-01-01T01:01:01Z</date>
+	<groups>
+		<group>
+			<name>Templates</name>
+		</group>
+	</groups>
+	<templates>
+		<template>
+			<template>Template App ARPalert</template>
+			<name>Template App ARPalert</name>
+			<groups>
+				<group>
+					<name>Templates</name>
+				</group>
+			</groups>
+			<applications>
+				<application>
+					<name>ARP alerts</name>
+				</application>
+			</applications>
+			<items>
+				<item>
+					<name>ARP alert trapper</name>
+					<type>TRAP</type>
+					<key>arpalert.trap</key>
+					<delay>0</delay>
+					<trends>0</trends>
+					<value_type>TEXT</value_type>
+					<allowed_hosts>{HOST.IP}</allowed_hosts>
+					<applications>
+						<application>
+							<name>ARP alerts</name>
+						</application>
+					</applications>
+					<triggers>
+						<trigger>
+							<expression>{str('type: 9')}=0</expression>
+							<recovery_mode>NONE</recovery_mode>
+							<name>Duplicate IP detected - {ITEM.LASTVALUE}</name>
+							<priority>DISASTER</priority>
+							<type>MULTIPLE</type>
+							<manual_close>YES</manual_close>
+						</trigger>
+					</triggers>
+				</item>
+			</items>
+		</template>
+	</templates>
+</zabbix_export>

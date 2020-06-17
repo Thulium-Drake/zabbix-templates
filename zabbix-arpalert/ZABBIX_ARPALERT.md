@@ -4,7 +4,7 @@ zabbix_arpalert - report arpalerts' notifications to zabbix.
 
 # SYNOPSIS
 
-`zabbix_arpalert [option]`
+`zabbix_arpalert [options]`
 
 # DESCRIPTION
 
@@ -41,8 +41,11 @@ The command also requires the following configuration file:
 
 `/etc/zabbix/zabbix-arpalert.conf`
 
-It should contain the variable ZABBIXSRV with the full name of the zabbix server
-used by zabbix_sender.
+It should contain the following variables:
+
+* ZABBIXSRV with the full name of the zabbix server used by zabbix_sender.
+* BUFFER a directory to store hashes of messages sent to reduce spammy-ness
+* COOLDOWN the amount of seconds between identical messages
 
 #### RUNNING
 
