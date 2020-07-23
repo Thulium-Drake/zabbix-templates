@@ -6,6 +6,10 @@ BUFFER=/tmp/zabbix-bondmon
 SOFTWARE="jo sed"
 
 function discover_bonds() {
+   [ -d "/proc/net/bonding/" ] && proc_discover_bonds
+}
+
+function proc_discover_bonds() {
    jo -p data=$( jo -a $(
    for bond in $(ls /proc/net/bonding)
    do
@@ -19,6 +23,10 @@ function discover_bonds() {
 }
 
 function getdata() {
+   [ -d "/proc/net/bonding/" ] && proc_getdata
+}
+
+function proc_getdata() {
    mkdir $BUFFER.$$; chmod 750 $BUFFER.$$
    cd $BUFFER.$$
 
