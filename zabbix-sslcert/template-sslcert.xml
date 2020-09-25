@@ -173,7 +173,7 @@
 				</macro>
 				<macro>
 					<macro>{$EXP_WARN}</macro>
-					<value>30d</value>
+					<value>28d</value>
 				</macro>
 			</macros>
 		</template>
