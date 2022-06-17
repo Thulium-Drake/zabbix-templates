@@ -10,6 +10,7 @@ The template collects:
 * Bytes read from the device
 * Reads completed
 * Writes completed
+* Temperature of the drive
 
 Based on the collected information, the following graph is made:
 

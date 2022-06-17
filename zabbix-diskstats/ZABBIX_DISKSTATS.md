@@ -27,6 +27,7 @@ referenced in all files in this repository is:
 In order for this command to work, the following software needs to be available:
 
 * jo
+* hddtemp
 
 ### ZABBIX_DISKSTATS CONFIGURATION
 

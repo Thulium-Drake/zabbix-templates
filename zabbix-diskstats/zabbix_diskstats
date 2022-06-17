@@ -3,7 +3,7 @@
 # Zabbix agent extension for monitoring devices in /proc/diskstats
 
 BUFFER=/tmp/zabbix-diskstats
-SOFTWARE="jo"
+SOFTWARE="jo hddtemp"
 
 function discover_disks() {
    jo -p data=$( jo -a $(
@@ -19,24 +19,26 @@ function getdata() {
 
    lsblk -ro NAME,TYPE 2>/dev/null | egrep 'disk|raid?' | sort -u | while read disk rest
    do
+      TEMPERATURE=$(hddtemp -nq /dev/$disk)
       grep -w $disk /proc/diskstats | while read MAJOR MINOR DMNAME READS_COMPLETED READS_MERGED READS_SECTORS READS_TIME WRITES_COMPLETED WRITES_MERGED WRITES_SECTORS WRITES_TIME IO_QUEUE IO_TIME WIO_TIME
       do
          cat <<-EOF > $disk
-				MAJOR:$MAJOR
-				MINOR:$MINOR
-				DMNAME:$DMNAME
-				READS_COMPLETED:$READS_COMPLETED
-				READS_MERGED:$READS_MERGED
-				READS_SECTORS:$READS_SECTORS
-				READS_TIME:$READS_TIME
-				WRITES_COMPLETED:$WRITES_COMPLETED
-				WRITES_MERGED:$WRITES_MERGED
-				WRITES_SECTORS:$WRITES_SECTORS
-				WRITES_TIME:$WRITES_TIME
-				IO_QUEUE:$IO_QUEUE
-				IO_TIME:$IO_TIME
-				WIO_TIME:$WIO_TIME
-			EOF
+        MAJOR:$MAJOR
+        MINOR:$MINOR
+        DMNAME:$DMNAME
+        READS_COMPLETED:$READS_COMPLETED
+        READS_MERGED:$READS_MERGED
+        READS_SECTORS:$READS_SECTORS
+        READS_TIME:$READS_TIME
+        WRITES_COMPLETED:$WRITES_COMPLETED
+        WRITES_MERGED:$WRITES_MERGED
+        WRITES_SECTORS:$WRITES_SECTORS
+        WRITES_TIME:$WRITES_TIME
+        IO_QUEUE:$IO_QUEUE
+        IO_TIME:$IO_TIME
+        WIO_TIME:$WIO_TIME
+        TEMPERATURE:$TEMPERATURE
+      EOF
       done
    done
 
