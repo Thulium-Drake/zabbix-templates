@@ -19,7 +19,7 @@ function getdata() {
 
    lsblk -ro NAME,TYPE 2>/dev/null | egrep 'disk|raid?' | sort -u | while read disk rest
    do
-      TEMPERATURE=$(hddtemp -nq /dev/$disk)
+      TEMPERATURE=$(hddtemp -nq /dev/$disk 2>/dev/null || echo 0)
       grep -w $disk /proc/diskstats | while read MAJOR MINOR DMNAME READS_COMPLETED READS_MERGED READS_SECTORS READS_TIME WRITES_COMPLETED WRITES_MERGED WRITES_SECTORS WRITES_TIME IO_QUEUE IO_TIME WIO_TIME
       do
          cat <<-EOF > $disk
