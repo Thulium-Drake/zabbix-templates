@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# Zabbix agent extension to retrieve data from Awesems API
+
+. /etc/zabbix/zabbix-awesems.conf
+BUFFER=/tmp/zabbix-awesems
+TARGET_DATE=$(date +%Y-%m)
+SOFTWARE="curl jq"
+
+
+function getdata() {
+  mkdir $BUFFER.$$; chmod 0750 $BUFFER.$$
+  cd $BUFFER.$$
+
+  # Get AWS Access token
+  curl -sS -q $AWS_IDP_URL -H "Content-Type: application/x-amz-json-1.1" -H "X-Amz-Target: AWSCognitoIdentityProviderService.InitiateAuth" -d @- << EOF | jq -r .AuthenticationResult.IdToken > aws_token
+{
+   "AuthParameters" : {
+      "USERNAME" : "$AWESEMS_EMAIL",
+      "PASSWORD" : "$AWESEMS_PASSWORD"
+   },
+   "AuthFlow" : "USER_PASSWORD_AUTH",
+   "ClientId" : "$AWESEMS_CLIENT_ID"
+}
+EOF
+
+  # Get Awesems API URL in AWS
+  AWESEMS_GRAPHQL_URL=$(curl -sS -q $AWESEMS_CONFIG_API -H "Authorization: $(cat aws_token)" -H "Content-Type: application/json" | jq -r .appSync.api)
+
+  curl -sS -q $AWESEMS_GRAPHQL_URL -H 'content-type: application/json' -H "Authorization: $(cat aws_token)" -d @- << EOF | jq '[.data.listConsumerCDRs.items[].cdr.total_energy] | add' > total_energy
+{
+  "operationName":"listConsumerCDRs",
+  "variables": {
+    "date":"$TARGET_DATE",
+    "cardRoles":["Primary","MustBePaidOff","BusinessInsight"],
+    "forView":true},
+    "query":"query listConsumerCDRs(\$date: String!, \$cardRoles: [CardRole], \$forView: Boolean) {
+      listConsumerCDRs(date: \$date, cardRoles: \$cardRoles, forView: \$forView) {
+      items {
+        cdr {
+          total_energy
+        }
+      }
+    }
+}
+"}
+EOF
+
+   test -d $BUFFER && mv $BUFFER $BUFFER.old
+   mv $BUFFER.$$ $BUFFER
+   rm -rf $BUFFER.old
+}
+function sanity_check() {
+   ok=1
+   for prog in $SOFTWARE
+   do
+      which $prog > /dev/null || { echo "Missing program $prog."; ok=0; }
+   done
+   test -f $CONFIG || { echo "Missing configfile $CONFIG"; ok=0; }
+   test $ok -ne 1 && { echo "Sanity check failed. Aboring." ; exit 1; }
+}
+
+sanity_check
+
+action=$1
+
+case "$action" in
+    getdata)
+        getdata
+        ;;
+    awesems.total_energy)
+        test -f $BUFFER/total_energy && cat $BUFFER/total_energy
+        ;;
+esac
