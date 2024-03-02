@@ -1,0 +1,33 @@
+zabbix_export:
+  version: '6.4'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: a5c3c974a112493dae284f6e8687e728
+      template: 'Template Awesems EVCharger'
+      name: 'Template Awesems EVCharger'
+      groups:
+        - name: Templates
+      items:
+        - uuid: 08843e403eb745c88f02142fcfcd2c1f
+          name: 'Charging station status'
+          key: awesems.status
+          trends: '0'
+          value_type: TEXT
+        - uuid: 0b7bba6d14c2465e9b83e341dd8b34bc
+          name: 'Charging station substatus'
+          key: awesems.sub_status
+          trends: '0'
+          value_type: TEXT
+          description: 'When plug is available for charging, value will be null'
+        - uuid: e60471f3835048169077da809b816138
+          name: 'Total energy used by EV'
+          key: awesems.total_energy
+          delay: 5m
+          value_type: FLOAT
+          units: Wh
+          preprocessing:
+            - type: MULTIPLIER
+              parameters:
+                - '1000'

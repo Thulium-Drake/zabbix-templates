@@ -43,6 +43,7 @@ The file should contain the following variables:
   AWESEMS_EMAIL - The email the user uses to sign in on the Awesems Portal
   AWESEMS_PASSWORD - The password for the email defined above
   AWESEMS_CLIENT_ID - The application ID for the Awesems API within AWS
+  AWESEMS_CHARGING_STAION_ID - The ID for the Awesems EV Charging station
 
 #### RUNNING
 
@@ -81,7 +82,7 @@ template needs to be imported.
 * Open the zabbix webinterface
 * Go to Configuration -> Templates
 * Choose Import
-* Choose browse and select the `template-awesems.xml` file in the file browser.
+* Choose browse and select the `template-awesems.yaml` file in the file browser.
 * Make any require changes to rules
 * Select Import
 
