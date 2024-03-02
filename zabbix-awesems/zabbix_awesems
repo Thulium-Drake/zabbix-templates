@@ -94,4 +94,7 @@ case "$action" in
     awesems.sub_status)
         test -f $BUFFER/charging_stations && cat $BUFFER/charging_stations |  jq .data.getChargingStations[].infuse.evses[].subStatus
         ;;
+    start_charging)
+        curl "https://mijn.awesems.com/api/infuse/chargingStationStartTransaction?evseId=1&token=$AWESEMS_TOKEN_ID&chargingStationId=$AWESEMS_CHARGING_STATION_ID" -H "Authorization: $(cat $BUFFER/aws_token)"
+        ;;
 esac
