@@ -46,6 +46,23 @@ EOF
 "}
 EOF
 
+curl -sS -q $AWESEMS_GRAPHQL_URL -X POST -H 'Content-Type: application/json' -H "authorization: $(cat aws_token)" -d @- << EOF > charging_stations
+{
+  "operationName":"getChargingStationsOverview",
+  "variables": { "chargingStationIds": ["$AWESEMS_CHARGING_STATION_ID"] },
+    "query": "query getChargingStationsOverview(\$chargingStationIds: [String]) {
+      getChargingStations(chargingStationIds: \$chargingStationIds) {
+        infuse {
+          evses {
+            status
+            subStatus
+          }
+        }
+      }
+  }"
+}
+EOF
+
    test -d $BUFFER && mv $BUFFER $BUFFER.old
    mv $BUFFER.$$ $BUFFER
    rm -rf $BUFFER.old
@@ -70,5 +87,11 @@ case "$action" in
         ;;
     awesems.total_energy)
         test -f $BUFFER/total_energy && cat $BUFFER/total_energy
+        ;;
+    awesems.status)
+        test -f $BUFFER/charging_stations && cat $BUFFER/charging_stations |  jq .data.getChargingStations[].infuse.evses[].status
+        ;;
+    awesems.sub_status)
+        test -f $BUFFER/charging_stations && cat $BUFFER/charging_stations |  jq .data.getChargingStations[].infuse.evses[].subStatus
         ;;
 esac
