@@ -44,6 +44,7 @@ The file should contain the following variables:
   AWESEMS_PASSWORD - The password for the email defined above
   AWESEMS_CLIENT_ID - The application ID for the Awesems API within AWS
   AWESEMS_CHARGING_STAION_ID - The ID for the Awesems EV Charging station
+  AWESEMS_TOKEN_ID - The ID for the Tank Card used for charging with the charging station
 
 #### RUNNING
 
