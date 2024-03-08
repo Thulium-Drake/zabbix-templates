@@ -15,6 +15,13 @@ zabbix_export:
           key: awesems.status
           trends: '0'
           value_type: TEXT
+          triggers:
+            - uuid: 2bcb7524d5a54e0eb6f520fb59ae3211
+              expression: 'last(/Template Awesems EVCharger/awesems.status)="OCCUPIED"'
+              name: 'EV Charger is connected'
+              priority: INFO
+              description: 'If the charger is connected to the EV'
+              manual_close: 'YES'
         - uuid: 0b7bba6d14c2465e9b83e341dd8b34bc
           name: 'Charging station substatus'
           key: awesems.sub_status
@@ -31,3 +38,19 @@ zabbix_export:
             - type: MULTIPLIER
               parameters:
                 - '1000'
+      macros:
+        - macro: '{$AWESEMS.OFFPEAK_START}'
+          value: '210000'
+          description: 'Start time for EV charging window (default is 21:00 when off-peak tariffs are active in NL)'
+  triggers:
+    - uuid: e7fd69b83df14f9cb13e45ec4328e347
+      expression: 'last(/Template Awesems EVCharger/awesems.status)="OCCUPIED" and last(/Template Awesems EVCharger/awesems.sub_status)<>"CHARGING" and last(/Template Awesems EVCharger/awesems.sub_status)<>"SUSPENDED_EV" and time()>{$AWESEMS.OFFPEAK_START}'
+      name: 'EV Charger is not charging car'
+      priority: WARNING
+      description: |
+        If the charger is not charging the EV and the EV is not fully charged.
+        
+        This trigger can be used to automatically activate the charger with a Trigger Action that runs the command below:
+        
+        /usr/local/bin/zabbix_awesems start_charging
+      manual_close: 'YES'
