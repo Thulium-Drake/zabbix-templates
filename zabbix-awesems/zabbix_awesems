@@ -5,8 +5,8 @@
 . /etc/zabbix/zabbix-awesems.conf
 BUFFER=/tmp/zabbix-awesems
 TARGET_DATE=$(date +%Y-%m)
+LAST_MONTH=$(date +%Y-%m -d "$(date +%Y-%m-15) -1 month")
 SOFTWARE="curl jq"
-
 
 function getdata() {
   mkdir $BUFFER.$$; chmod 0750 $BUFFER.$$
@@ -32,6 +32,25 @@ EOF
   "operationName":"listConsumerCDRs",
   "variables": {
     "date":"$TARGET_DATE",
+    "cardRoles":["Primary","MustBePaidOff","BusinessInsight"],
+    "forView":true},
+    "query":"query listConsumerCDRs(\$date: String!, \$cardRoles: [CardRole], \$forView: Boolean) {
+      listConsumerCDRs(date: \$date, cardRoles: \$cardRoles, forView: \$forView) {
+      items {
+        cdr {
+          total_energy
+        }
+      }
+    }
+}
+"}
+EOF
+
+  curl -sS -q $AWESEMS_GRAPHQL_URL -H 'content-type: application/json' -H "Authorization: $(cat aws_token)" -d @- << EOF | jq '[.data.listConsumerCDRs.items[].cdr.total_energy] | add' > last_month_total_energy
+{
+  "operationName":"listConsumerCDRs",
+  "variables": {
+    "date":"$LAST_MONTH",
     "cardRoles":["Primary","MustBePaidOff","BusinessInsight"],
     "forView":true},
     "query":"query listConsumerCDRs(\$date: String!, \$cardRoles: [CardRole], \$forView: Boolean) {
@@ -87,6 +106,9 @@ case "$action" in
         ;;
     awesems.total_energy)
         test -f $BUFFER/total_energy && cat $BUFFER/total_energy
+        ;;
+    awesems.last_month_total_energy)
+        test -f $BUFFER/last_month_total_energy && cat $BUFFER/last_month_total_energy
         ;;
     awesems.status)
         test -f $BUFFER/charging_stations && cat $BUFFER/charging_stations |  jq -r .data.getChargingStations[].infuse.evses[].status
