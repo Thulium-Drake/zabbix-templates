@@ -1,0 +1,247 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 846977d1dfed4968bc5f8bdb363285bc
+      name: 'Templates/Operating systems'
+  templates:
+    - uuid: b6b4ca1f6a14424e8874eedaee1ebb0c
+      template: 'End of Life tracking by Zabbix agent'
+      name: 'End of Life tracking by Zabbix agent'
+      groups:
+        - name: 'Templates/Operating systems'
+      items:
+        - uuid: 00ec52b1ef5a4d98ab3fa2e46fbfd862
+          name: 'OS End of Life Date'
+          type: DEPENDENT
+          key: eol.date
+          delay: '0'
+          value_type: TEXT
+          trends: '0'
+          description: 'Uses OS Support Data to obtain the right variable containing the Base OS eol date.'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.eol
+          master_item:
+            key: eol.support_data
+          tags:
+            - tag: component
+              value: end_of_life
+        - uuid: a6462f90a81d4766a93b6d40848738bc
+          name: 'Base support Remaining days'
+          type: DEPENDENT
+          key: eol.eol_remaining
+          delay: '0'
+          value_type: TEXT
+          trends: '0'
+          description: 'Returns the days remaining of base OS support.'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  // Set eol date from dependent item
+                  const eolDate = new Date(value);
+                  const eolEpoch = eolDate.getTime();
+                  
+                  // Obtain eol date from dependent item
+                  currentDate = new Date()
+                  dateNow = currentDate.toISOString().split('T')[0]
+                  const currentDate = new Date(dateNow);
+                  const currentEpoch = currentDate.getTime();
+                  
+                  // Do the maths to obtain difference
+                  const diffTime = eolEpoch - currentEpoch;
+                  const secondsTillEol = diffTime / 1000;
+                  const minutesTillEol = secondsTillEol / 60;
+                  const hoursTillEol = minutesTillEol / 60;
+                  const daysTillEol = hoursTillEol / 24;
+                  
+                  return daysTillEol;
+          master_item:
+            key: eol.date
+          tags:
+            - tag: component
+              value: end_of_life
+          triggers:
+            - uuid: ec8b193d85f14b95821161dd7c8b3ae1
+              expression: 'last(/End of Life tracking by Zabbix agent/eol.eol_remaining)<{$EOL_INFO}'
+              name: 'Less than {$EOL_INFO} days remaining on Base OS support'
+              priority: INFO
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Less than {$EOL_WARN} days remaining on Base OS support'
+                  expression: 'last(/End of Life tracking by Zabbix agent/eol.eol_remaining)<{$EOL_WARN}'
+              tags:
+                - tag: component
+                  value: end_of_life
+            - uuid: dc9d015ad6ad4fb197d6739f39819617
+              expression: 'last(/End of Life tracking by Zabbix agent/eol.eol_remaining)<{$EOL_WARN}'
+              name: 'Less than {$EOL_WARN} days remaining on Base OS support'
+              priority: WARNING
+              manual_close: 'YES'
+              dependencies:
+                - name: 'Less than {$EOL_INFO} days remaining on Extended Update Support'
+                  expression: 'last(/End of Life tracking by Zabbix agent/eol.eus_remaining)<{$EOL_INFO} and last(/End of Life tracking by Zabbix agent/eol.eus_data)="eus"'
+              tags:
+                - tag: component
+                  value: end_of_life
+        - uuid: 02498fc66dcb423b9354e2e97564ea44
+          name: 'EUS Support Data'
+          type: DEPENDENT
+          key: eol.eus_data
+          delay: '0'
+          value_type: TEXT
+          trends: '0'
+          description: 'Checks if eol.eus_data contains any reference of EUS.'
+          preprocessing:
+            - type: REGEX
+              parameters:
+                - eus
+                - eus
+              error_handler: CUSTOM_VALUE
+              error_handler_params: no-eus-found
+          master_item:
+            key: 'vfs.file.contents[/etc/yum.repos.d/redhat.repo]'
+          tags:
+            - tag: component
+              value: end_of_life
+        - uuid: 3465de9f0b51454dab3821f7e59c5239
+          name: 'EUS Remaining days'
+          type: DEPENDENT
+          key: eol.eus_remaining
+          delay: '0'
+          value_type: TEXT
+          trends: '0'
+          description: 'Returns the days remaining of EUS support'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  // Set eol date from dependent item
+                  const eolDate = new Date(value);
+                  const eolEpoch = eolDate.getTime();
+                  
+                  // Obtain eol date from dependent item
+                  currentDate = new Date()
+                  dateNow = currentDate.toISOString().split('T')[0]
+                  const currentDate = new Date(dateNow);
+                  const currentEpoch = currentDate.getTime();
+                  
+                  // Do the maths to obtain difference
+                  const diffTime = eolEpoch - currentEpoch;
+                  const secondsTillEol = diffTime / 1000;
+                  const minutesTillEol = secondsTillEol / 60;
+                  const hoursTillEol = minutesTillEol / 60;
+                  const daysTillEol = hoursTillEol / 24;
+                  
+                  return daysTillEol;
+          master_item:
+            key: eol.lts_date
+          tags:
+            - tag: component
+              value: end_of_life
+        - uuid: f09355f62c3c4188bf31c496e237bb55
+          name: 'OS Extended Support Date'
+          type: DEPENDENT
+          key: eol.lts_date
+          delay: '0'
+          value_type: TEXT
+          trends: '0'
+          description: 'Uses OS Support Data to obtain the right variable containing the EUS date.'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.extendedSupport
+          master_item:
+            key: eol.support_data
+          tags:
+            - tag: component
+              value: end_of_life
+        - uuid: 760abc4f7c4945eda0949a17a989ee54
+          name: 'OS Support Data'
+          type: DEPENDENT
+          key: eol.support_data
+          delay: '0'
+          value_type: TEXT
+          trends: '0'
+          description: 'Gets information from eol.date using the release info item'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  // Get values from Zabbix item value
+                  const idMatch = value.match(/^ID="(.*?)"/m),
+                      versionIdMatch = value.match(/^VERSION_ID="(\d+)/m);
+                  
+                  // Map to variables
+                  const osFamily = idMatch ? idMatch[1] : null,
+                      osVersion = versionIdMatch ? versionIdMatch[1] : null;
+                  
+                  // Construct the API URL
+                  const apiReq = new HttpRequest();
+                  
+                  if (osFamily && osVersion) {
+                      const apiUrl = "https://endoflife.date/api/" + osFamily + "/" + osVersion + ".json";
+                      apiData = apiReq.get(apiUrl);
+                      return apiData;
+                  } else {
+                      throw 'Failed to extract required values for API URL.';
+                  }
+          master_item:
+            key: 'vfs.file.contents[/etc/os-release]'
+          tags:
+            - tag: component
+              value: end_of_life
+        - uuid: e7244cc2b0d342748a03c5c24109d099
+          name: 'Release info'
+          key: 'vfs.file.contents[/etc/os-release]'
+          delay: 1d
+          value_type: TEXT
+          trends: '0'
+          description: 'Grabs the contents of the /etc/os-release file'
+          tags:
+            - tag: component
+              value: end_of_life
+        - uuid: 45b453a6d37445c7991a567af636e2c7
+          name: 'EUS info'
+          key: 'vfs.file.contents[/etc/yum.repos.d/redhat.repo]'
+          delay: 1d
+          value_type: TEXT
+          trends: '0'
+          description: 'Grabs the contents of the /etc/yum.repos.d/redhat.repo file.'
+          tags:
+            - tag: component
+              value: end_of_life
+      macros:
+        - macro: '{$EOL_INFO}'
+          value: '365'
+          description: 'Days until EOL threshold'
+        - macro: '{$EOL_REL}'
+          value: 'vfs.file.regexp[/etc/os-release,"^ID=\"([a-zA-Z0-9._-]+)\""]'
+        - macro: '{$EOL_VER}'
+          value: 'vfs.file.regexp[/etc/os-release,"^VERSION_ID=\"(\d+)",,,,\1]'
+        - macro: '{$EOL_WARN}'
+          value: '180'
+          description: 'Days until EOL threshold'
+  triggers:
+    - uuid: 11cf98d494524a229c740c22afb21fa7
+      expression: 'last(/End of Life tracking by Zabbix agent/eol.eus_remaining)<{$EOL_INFO} and last(/End of Life tracking by Zabbix agent/eol.eus_data)="eus"'
+      name: 'Less than {$EOL_INFO} days remaining on Extended Update Support'
+      priority: INFO
+      description: 'Returns an informational warning whenever Extended Update Support reaches less than {$EOL_INFO} days.'
+      manual_close: 'YES'
+      dependencies:
+        - name: 'Less than {$EOL_WARN} days remaining on Extended Update Support'
+          expression: 'last(/End of Life tracking by Zabbix agent/eol.eus_remaining)<{$EOL_WARN} and last(/End of Life tracking by Zabbix agent/eol.eus_data)="eus"'
+      tags:
+        - tag: component
+          value: end_of_life
+    - uuid: bfb33a5e37fe45e397af6ac63df77258
+      expression: 'last(/End of Life tracking by Zabbix agent/eol.eus_remaining)<{$EOL_WARN} and last(/End of Life tracking by Zabbix agent/eol.eus_data)="eus"'
+      name: 'Less than {$EOL_WARN} days remaining on Extended Update Support'
+      priority: WARNING
+      description: 'Returns an informational warning whenever Extended Update Support reaches less than {$EOL_WARN} days.'
+      manual_close: 'YES'
+      tags:
+        - tag: component
+          value: end_of_life
