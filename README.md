@@ -7,7 +7,9 @@ Collection of templates for Zabbix and their supporting scripts
 * [zabbix_bondmon](zabbix-bondmon/): Linux bonding interface monitoring
 * [zabbix_catialic](zabbix-catialic/): CATIA License monitoring
 * [zabbix_diskstats](zabbix-diskstats/): Linux disk I/O monitoring
+* [zabbix_eol_tracking](zabbix-eol-tracking/): End of Life Tracking
 * [zabbix_flexlm](zabbix-flexlm/): FlexLM License monitoring
+* [zabbix_icmp_ping](zabbix-icmp-ping/): ICMP Ping
 * [zabbix_kmod](zabbix-kmod/): Kernel Module monitoring
 * [zabbix_ldap](zabbix-ldap/): LDAP monitoring
 * [zabbix_mailflow](zabbix-mailflow/): Mailflow monitoring
