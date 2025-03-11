@@ -72,7 +72,7 @@ zapi.timeout = 60.1
 if (conf['username'] is None) and (conf['api_token'] is None):
     print('ERROR: No credentials found, please define username/password or api_token')
 
-if conf['username'] is not None:
+if conf['password'] is not None:
     zapi.login (conf['username'], conf['password'])
 
 if conf['api_token'] is not None:
@@ -133,6 +133,8 @@ if os.path.isdir(args.import_path):
         with open(file, 'r') as f:
             if file.endswith('yaml'):
                 f_format = 'yaml'
+            elif file.endswith('yml'):
+                f_format = 'yaml'
             elif file.endswith('xml'):
                 f_format = 'xml'
             else:
@@ -151,6 +153,8 @@ elif os.path.isfile(args.import_path):
     for file in files:
         with open(file, 'r') as f:
             if file.endswith('yaml'):
+                f_format = 'yaml'
+            elif file.endswith('yml'):
                 f_format = 'yaml'
             elif file.endswith('xml'):
                 f_format = 'xml'
