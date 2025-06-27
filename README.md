@@ -15,6 +15,7 @@ Collection of templates for Zabbix and their supporting scripts
 * [zabbix_mailflow](zabbix-mailflow/): Mailflow monitoring
 * [zabbix_nvidia_mem](zabbix-nvidia-mem/): Nvidia GPU memory monitoring
 * [zabbix_netstat](zabbix-netstat/): Linux interface statistics monitoring
+* [zabbix_sensors](zabbix-sensors/): System sensors
 * [zabbix_sslcert](zabbix-sslcert/): SSL certificate validity
 * [zabbix_tapestats](zabbix-tapestats/): Tape drive throughput monitoring
 * [zabbix_thinlinc](zabbix-thinlinc/): Thinlinc License monitoring

@@ -1,0 +1,126 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: ae1e7b7491604238888e781a4d1f7584
+      template: 'System Sensors by Zabbix agent'
+      name: 'System Sensors by Zabbix agent'
+      groups:
+        - name: Templates
+      discovery_rules:
+        - uuid: f1f383e2757b44ab9de4c938d21764a9
+          name: 'Discovery lm-sensors'
+          key: sensor.discovery
+          delay: 1h
+          item_prototypes:
+            - uuid: ad2ec5c5f3bb4b418406ab8f5c716c23
+              name: '{#CHIP} - {#SENSOR}'
+              key: 'sensor[{#CHIP},{#SENSOR}]'
+              delay: 5m
+              value_type: FLOAT
+              units: '{#UNITS}'
+              tags:
+                - tag: component
+                  value: sensors
+          graph_prototypes:
+            - uuid: f08f95ade53040438e41834ea007eee9
+              name: '{#CHIP} - {#SENSOR}'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'System Sensors by Zabbix agent'
+                    key: 'sensor[{#CHIP},{#SENSOR}]'
+      dashboards:
+        - uuid: d59070299adc4411a425ed35411f892c
+          name: 'System sensors'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  name: '{#SENSOR} on {#CHIP}'
+                  width: '70'
+                  height: '11'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '4'
+                    - type: ITEM_PROTOTYPE
+                      name: itemid.0
+                      value:
+                        host: 'System Sensors by Zabbix agent'
+                        key: 'sensor[{#CHIP},{#SENSOR}]'
+                    - type: STRING
+                      name: reference
+                      value: YORIV
+                    - type: INTEGER
+                      name: rf_rate
+                      value: '120'
+                    - type: INTEGER
+                      name: rows
+                      value: '3'
+                    - type: INTEGER
+                      name: source_type
+                      value: '3'
+    - uuid: 88d1ff383d254e3f8c717638c57540c2
+      template: 'System Sensors by Zabbix agent active'
+      name: 'System Sensors by Zabbix agent active'
+      groups:
+        - name: Templates
+      discovery_rules:
+        - uuid: 06935b0982a94b99a7a0c8d97c1a04d8
+          name: 'Discovery lm-sensors'
+          type: ZABBIX_ACTIVE
+          key: sensor.discovery
+          delay: 1h
+          item_prototypes:
+            - uuid: 53a36df5655a412b996a85034076a124
+              name: '{#CHIP} - {#SENSOR}'
+              type: ZABBIX_ACTIVE
+              key: 'sensor[{#CHIP},{#SENSOR}]'
+              delay: 5m
+              value_type: FLOAT
+              units: '{#UNITS}'
+              tags:
+                - tag: component
+                  value: sensors
+          graph_prototypes:
+            - uuid: ea8b96c5166a48a981b5bb187ca738ea
+              name: '{#CHIP} - {#SENSOR}'
+              graph_items:
+                - color: 1A7C11
+                  calc_fnc: ALL
+                  item:
+                    host: 'System Sensors by Zabbix agent active'
+                    key: 'sensor[{#CHIP},{#SENSOR}]'
+      dashboards:
+        - uuid: 476dc3142cf94c40855a8f06740c0c48
+          name: 'System sensors'
+          pages:
+            - widgets:
+                - type: graphprototype
+                  name: '{#SENSOR} on {#CHIP}'
+                  width: '70'
+                  height: '11'
+                  fields:
+                    - type: INTEGER
+                      name: columns
+                      value: '4'
+                    - type: ITEM_PROTOTYPE
+                      name: itemid.0
+                      value:
+                        host: 'System Sensors by Zabbix agent active'
+                        key: 'sensor[{#CHIP},{#SENSOR}]'
+                    - type: STRING
+                      name: reference
+                      value: YORIV
+                    - type: INTEGER
+                      name: rf_rate
+                      value: '120'
+                    - type: INTEGER
+                      name: rows
+                      value: '3'
+                    - type: INTEGER
+                      name: source_type
+                      value: '3'
