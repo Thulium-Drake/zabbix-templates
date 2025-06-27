@@ -1,0 +1,40 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 846977d1dfed4968bc5f8bdb363285bc
+      name: 'Templates/Operating systems'
+  templates:
+    - uuid: 3f2d8e9a4c5b4a8fb9e01d7c3a2f6e58
+      template: 'Linux Package Updates by Zabbix Agent'
+      name: 'Template Linux Package Updates by Zabbix Agent'
+      description: 'This template will show the amount of packages that can be updated on a given system. It utilizes a userparameter and script to collect the information.'
+      groups:
+        - name: 'Templates/Operating systems'
+      items:
+        - uuid: d2e1f3b81c744227b4a89a5e7d1f2349
+          name: 'Count of upgradable packages'
+          key: packages.count
+          delay: 1h
+          history: 90d
+          trends: '0'
+          units: packages
+          triggers:
+            - uuid: ad7f29ecb5634bc8badf6baea548ebef
+              expression: 'last(/Template Linux Package Updates by Zabbix Agent/packages.count)>0'
+              name: 'OS updates available'
+              priority: INFO
+        - uuid: f7c9a01e5d724b3aa9e4c88e6bdf37d4
+          name: 'List upgradable packages'
+          key: packages.list
+          delay: 1h
+          history: 90d
+          value_type: TEXT
+          trends: '0'
+        - uuid: 8a5f9b217e3d4c289a1012f64e5d7b3c
+          name: 'Run package updates script'
+          key: packages.update
+          delay: 1d
+          history: 90d
+          value_type: TEXT
+          trends: '0'
+          description: 'This is used to trigger the collection of data, it will not return any data.'

@@ -1,0 +1,34 @@
+#!/bin/bash
+# Collect package update stats from the package manager and save to files Zabbix can use to read it
+
+output_file="/tmp/zabbix_upgradable_packages"
+count_file="/tmp/zabbix_pending_upgrades"
+
+get_upgradable_apt() {
+    apt-get update -qq >/dev/null 2>&1
+    apt list --upgradable 2>/dev/null | grep -v Listing
+}
+
+get_upgradable_dnf() {
+    dnf --refresh check-update >/dev/null 2>&1
+    dnf --cacheonly check-update 2>/dev/null | sed '1,3d' | grep -E '^[a-zA-Z0-9]' || true
+}
+
+filter_dnf_output() {
+    echo "$1" | sed '1,2d' | grep -v '^Security:'
+}
+
+if command -v apt-get >/dev/null 2>&1; then
+    upgradable=$(get_upgradable_apt)
+elif command -v dnf >/dev/null 2>&1; then
+    upgradable=$(get_upgradable_dnf)
+else
+    echo "No supported package manager found" > "$output_file"
+    echo 0 > "$count_file"
+    exit 1
+fi
+
+count=$(echo "$upgradable" | grep -c '.')
+
+echo "$upgradable" > "$output_file"
+echo "$count" > "$count_file"
